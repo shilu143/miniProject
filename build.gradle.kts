@@ -1,8 +1,7 @@
 plugins {
-//    id("java")
+    id("java")
     application
 }
-
 
 group = "org.iitrpr"
 version = "1.0-SNAPSHOT"
@@ -18,11 +17,12 @@ dependencies {
     annotationProcessor("info.picocli:picocli-codegen:4.7.1")
     runtimeOnly("org.postgresql:postgresql:42.3.1")
     implementation("io.github.cdimascio:dotenv-java:2.3.2")
+    implementation("org.mindrot:jbcrypt:0.4")
 }
 
-//application {
-//
-//}
+application {
+    mainClass.set("org.iitrpr.App")
+}
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
