@@ -4,30 +4,53 @@ CREATE SCHEMA public;
 GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO public;
 
-CREATE TABLE AIMS_USER (
-    name varchar,
+CREATE TABLE _USER (
     id varchar,
     role varchar,
-    dept varchar,
-    email varchar,
     hashedpass varchar,
     PRIMARY KEY(id)
 );
 
-create or replace procedure CREATE_USER(
-   name varchar,
+CREATE TABLE STUDENT (
+    name varchar,
+    id varchar,
+    dept varchar,
+    email varchar,
+    contact varchar,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE FACULTY (
+    name varchar,
+    id varchar,
+    dept varchar,
+    email varchar,
+    contact varchar,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE OFFICE (
+    name varchar,
+    id varchar,
+    dept varchar,
+    email varchar,
+    contact varchar,
+    PRIMARY KEY(id)
+);
+
+CREATE OR REPLACE PROCEDURE CREATE_USER(
    id varchar,
    role varchar,
-   dept varchar,
-   email varchar,
    hashedpass varchar
 )
-language plpgsql
-as $$
-begin
-    insert into AIMS_USER values(name, id, role, dept, email, hashedpass);
-end;
+LANGUAGE plpgsql
+AS $$
+    BEGIN
+        INSERT INTO _USER VALUES(id, role, hashedpass);
+    END;
 $$;
+
+
 
 
 
