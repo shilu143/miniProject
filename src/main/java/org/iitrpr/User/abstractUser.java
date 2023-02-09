@@ -1,10 +1,6 @@
 package org.iitrpr.User;
 
-import de.vandermeer.asciitable.AsciiTable;
-import de.vandermeer.asciitable.CWC_LongestLine;
-import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
-
-import java.sql.Connection;
+import java.sql.*;
 import java.util.*;
 
 abstract class abstractUser {
@@ -21,25 +17,63 @@ abstract class abstractUser {
 
     Connection connection;
     String id;
-    abstractUser(Connection connection, String id) {
+    Boolean isLoggedout;
+    String role;
+    abstractUser(Connection connection, String id, String role) {
         this.connection = connection;
         this.id = id;
-        deptMap.put("cse", "Computer Science and Engineering");
-        deptMap.put("ce", "Civil Engineering");
-        deptMap.put("che", "Chemical Engineering");
-        deptMap.put("ee", "Electrical Engineering");
-        deptMap.put("mce", "Mathematics and Computing Engineering");
-        deptMap.put("me", "Mechanical Engineering");
-        deptMap.put("mme", "Metallurgical and Materials Engineering");
+        this.role = role;
+        isLoggedout = false;
         System.out.println(ANSI_CYAN + "\n\nAIMS PORTAL WELCOMES U ;)\n" + ANSI_RESET);
     }
 
+    protected ArrayList<String> fetchData() {
+        PreparedStatement st = null;
+        try {
+            String query = String.format("SELECT * FROM %s as s " +
+                    "INNER JOIN DEPARTMENT as d " +
+                    "ON s.deptid = d.deptid " +
+                    "WHERE LOWER(id) = LOWER('%s')", role, id);
+
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            String name = null;
+            String dept = null;
+            String email = null;
+            String contact = null;
+            while(rs.next()) {
+                name = rs.getString("name");
+                dept = rs.getString("deptname");
+                email = rs.getString("email");
+                contact = rs.getString("contact");
+            }
+
+            assert name != null;
+            ArrayList<String> result = new ArrayList<>();
+            result.add(name.toUpperCase());
+            result.add(id.toUpperCase());
+            result.add(role.toUpperCase());
+            result.add(dept);
+            result.add(email);
+            result.add(contact);
+            return result;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     abstract void showMenu();
+    protected void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
     void showPersonalDetails() {
 
     };
     abstract void editPersonalDetails();
     abstract void showAllCourse();
-    abstract void logout();
+    protected void logout() {
+        isLoggedout = true;
+    }
 
 }

@@ -1,65 +1,83 @@
 package org.iitrpr.User;
-
-import de.vandermeer.asciitable.AsciiTable;
-import de.vandermeer.asciitable.CWC_LongestLine;
-import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
+import org.iitrpr.utils.CLI;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Faculty extends abstractUser {
-    public Faculty(Connection connection, String id) {
-        super(connection, id);
-    }
-
-    private String[] fetchData() {
-        PreparedStatement st = null;
-        try {
-            String query = String.format("SELECT * FROM FACULTY " +
-                    "WHERE LOWER(id) = LOWER('%s')", id);
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            String name = null;
-            String dept = null;
-            String email = null;
-            String contact = null;
-            while(rs.next()) {
-                name = rs.getString("name");
-                dept = rs.getString("dept");
-                email = rs.getString("email");
-                contact = rs.getString("contact");
-            }
-            assert name != null;
-
-            return new String[]{name.toUpperCase(), id.toUpperCase(), "FACULTY", deptMap.get(dept), email, contact};
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public Faculty(Connection connection, String id, String role) {
+        super(connection, id, role);
     }
 
     @Override
     public void showMenu() {
-//        System.out.println("This is a Faculty portal " + id.toUpperCase());
-        AsciiTable table = new AsciiTable();
-        table.addRule();
-        table.addRow(null, "PERSONAL DETAILS").setTextAlignment(TextAlignment.CENTER);
-        table.addRule();
-        String[] headers = {
-                "name", "id", "role", "department", "email", "contact no."
-        };
-        String[] data = fetchData();
+        do {
+            clearScreen();
 
-        for(int i = 0;i < headers.length;i++) {
-            table.addRow(headers[i].toUpperCase(),data[i]).setPaddingLeftRight(2);
-            table.addRule();
-        }
-        table.getRenderer().setCWC(new CWC_LongestLine());
-        System.out.println(table.render());
+            ArrayList<String> options = new ArrayList<>();
+            options.add("Personal Details");
+            options.add("Edit Details");
+            options.add("Show Courses");
+            options.add("Logout");
+
+            CLI cli = new CLI();
+            cli.createMenu(4, "Main Menu", "Welcome to AIMS Portal", options);
+
+            Scanner sc = new Scanner(System.in);
+            boolean runner;
+            do {
+                runner = false;
+                System.out.print("> ");
+                String inp = sc.nextLine();
+                switch (inp) {
+                    case "0" -> showPersonalDetails();
+                    case "1" -> editPersonalDetails();
+                    case "2" -> showAllCourse();
+                    case "3" -> logout();
+                    default -> runner = true;
+                }
+            } while(runner);
+        } while(!isLoggedout);
     }
-
 
     @Override
     void showPersonalDetails() {
+        clearScreen();
+        CLI cli = new CLI();
 
+        ArrayList<String> headers = new ArrayList<>();
+        headers.add("name");
+        headers.add("id");
+        headers.add("role");
+        headers.add("department");
+        headers.add("email");
+        headers.add("contact no.");
+        ArrayList<String> data = fetchData();
+
+        cli.createVerticalTable(headers, data);
+
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Back");
+        options.add("Logout");
+
+
+        cli.createMenu(2, "SubMenu", null, options);
+
+        Scanner sc = new Scanner(System.in);
+        boolean runner;
+        do {
+            runner = false;
+            System.out.print("> ");
+            String inp = sc.nextLine();
+            switch (inp) {
+                case "0" -> {
+                    //returns to previous method
+                }
+                case "1" -> logout();
+                default -> runner = true;
+            }
+        } while(runner);
     }
 
     @Override
@@ -69,11 +87,6 @@ public class Faculty extends abstractUser {
 
     @Override
     void showAllCourse() {
-
-    }
-
-    @Override
-    void logout() {
 
     }
 

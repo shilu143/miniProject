@@ -30,16 +30,20 @@ public class Seeder {
     }
     public void fill(Connection connection) {
             try {
-                File file = new File("./assets/seedHelper.csv");
-                Scanner scan = new Scanner(file);
-                scan.nextLine();
-                while (scan.hasNextLine()) {
-                    String str = scan.nextLine();
+                File file1 = new File("./assets/data/seedHelper.csv");
+                File file2 = new File("./assets/data/department.csv");
+                Scanner scan1 = new Scanner(file1);
+                Scanner scan2 = new Scanner(file2);
+                scan1.nextLine();
+                scan2.nextLine();
+
+                while (scan1.hasNextLine()) {
+                    String str = scan1.nextLine();
                     String[] input = str.split(",");
                     String name = input[0].toLowerCase();
                     String id = input[1].toLowerCase();
                     String role = input[2].toLowerCase();
-                    String dept = input[3].toLowerCase();
+                    String deptId = input[3].toLowerCase();
                     String email = input[4];
                     String contact = input[5];
                     String password = input[6];
@@ -58,7 +62,7 @@ public class Seeder {
                         st = connection.prepareStatement(query);
                         st.setString(1, name);
                         st.setString(2, id);
-                        st.setString(3, dept);
+                        st.setString(3, deptId);
                         st.setString(4, email);
                         st.setString(5, contact);
                         st.executeUpdate();
@@ -67,7 +71,23 @@ public class Seeder {
                         System.out.println(exception.getMessage());
                     }
                 }
-                scan.close();
+                scan1.close();
+
+                while(scan2.hasNextLine()) {
+                    String str = scan2.nextLine();
+                    String[] input = str.split(",");
+                    String deptId = input[0];
+                    String deptName = input[1];
+                    try {
+                        PreparedStatement st = connection.prepareStatement("INSERT INTO DEPARTMENT VALUES (?, ?)");
+                        st.setString(1, deptId);
+                        st.setString(2, deptName);
+                        st.executeUpdate();
+                        st.close();
+                    } catch (SQLException exception) {
+                        System.out.println(exception.getMessage());
+                    }
+                }
             } catch (IOException e) {
                 System.out.print(e.getLocalizedMessage());
             }

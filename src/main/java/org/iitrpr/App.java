@@ -43,15 +43,15 @@ public class App {
             }
             if (id != null && BCrypt.checkpw(pass, hashedpass)) {
                 if(role.equalsIgnoreCase("student")) {
-                    Student student = new Student(connection, id);
+                    Student student = new Student(connection, id, role);
                     student.showMenu();
                 }
                 else if(role.equalsIgnoreCase("faculty")) {
-                    Faculty faculty = new Faculty(connection, id);
+                    Faculty faculty = new Faculty(connection, id, role);
                     faculty.showMenu();
                 }
                 else if(role.equalsIgnoreCase("office")) {
-                    AcademicOffice acad = new AcademicOffice(connection, id);
+                    AcademicOffice acad = new AcademicOffice(connection, id, role);
                     acad.showMenu();
                 }
                 else {
@@ -97,18 +97,6 @@ public class App {
             System.out.print("Enter your password : ");
             password = sc.nextLine();
         }
-//        boolean loggedout = false;
-//        while (!loggedout) {
-//            System.out.print("> ");
-//            String inp = sc.nextLine();
-//            if(inp.equals("q") || inp.equals("quit")) {
-//                loggedout = true;
-//            }
-//            else if(inp.equals("clear")) {
-//                System.out.print("\033[H\033[2J");
-//                System.out.flush();
-//            }
-//        }
 
         System.out.println("bye");
         sc.close();

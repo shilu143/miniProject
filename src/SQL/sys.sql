@@ -14,7 +14,7 @@ CREATE TABLE _USER (
 CREATE TABLE STUDENT (
     name varchar,
     id varchar,
-    dept varchar,
+    deptid varchar,
     email varchar,
     contact varchar,
     PRIMARY KEY(id)
@@ -23,7 +23,7 @@ CREATE TABLE STUDENT (
 CREATE TABLE FACULTY (
     name varchar,
     id varchar,
-    dept varchar,
+    deptid varchar,
     email varchar,
     contact varchar,
     PRIMARY KEY(id)
@@ -32,23 +32,17 @@ CREATE TABLE FACULTY (
 CREATE TABLE OFFICE (
     name varchar,
     id varchar,
-    dept varchar,
+    deptid varchar,
     email varchar,
     contact varchar,
     PRIMARY KEY(id)
 );
 
-CREATE OR REPLACE PROCEDURE CREATE_USER(
-   id varchar,
-   role varchar,
-   hashedpass varchar
-)
-LANGUAGE plpgsql
-AS $$
-    BEGIN
-        INSERT INTO _USER VALUES(id, role, hashedpass);
-    END;
-$$;
+CREATE TABLE DEPARTMENT (
+    deptid varchar,
+    deptname varchar,
+    PRIMARY KEY(deptid)
+);
 
 
 
