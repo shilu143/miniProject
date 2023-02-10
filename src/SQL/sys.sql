@@ -45,6 +45,36 @@ CREATE TABLE DEPARTMENT (
 );
 
 
+CREATE TABLE COURSE_CATALOG (
+    id varchar,
+    name varchar,
+    ltp integer[3],
+    prereq varchar[],
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE Y1_OFFERING (
+    courseid varchar,
+    cgcriteria real,
+    fid varchar[]
+);
+CREATE TABLE Y2_OFFERING (
+    courseid varchar,
+    cgcriteria real,
+    fid varchar[]
+);
+CREATE TABLE Y3_OFFERING (
+    courseid varchar,
+    cgcriteria real,
+    fid varchar[]
+);
+CREATE TABLE Y4_OFFERING (
+    courseid varchar,
+    cgcriteria real,
+    fid varchar[]
+);
+
+
 
 
 

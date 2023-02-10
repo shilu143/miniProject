@@ -43,46 +43,68 @@ public class Student extends abstractUser {
 
     @Override
     void showPersonalDetails() {
-        clearScreen();
-        CLI cli = new CLI();
-
-        ArrayList<String> headers = new ArrayList<>();
-        headers.add("name");
-        headers.add("id");
-        headers.add("role");
-        headers.add("department");
-        headers.add("email");
-        headers.add("contact no.");
-        ArrayList<String> data = fetchData();
-
-        cli.createVerticalTable(headers, data);
-
-        ArrayList<String> options = new ArrayList<>();
-        options.add("Back");
-        options.add("Logout");
-
-
-        cli.createMenu(2, "SubMenu", null, options);
-
-        Scanner sc = new Scanner(System.in);
-        boolean runner;
+        boolean outer;
         do {
-            runner = false;
-            System.out.print("> ");
-            String inp = sc.nextLine();
-            switch (inp) {
-                case "0" -> {
-                    //returns to previous method
+            outer = false;
+            clearScreen();
+            CLI cli = new CLI();
+
+            ArrayList<String> headers = new ArrayList<>();
+            headers.add("name");
+            headers.add("id");
+            headers.add("role");
+            headers.add("batch");
+            headers.add("department");
+            headers.add("email");
+            headers.add("contact no.");
+            ArrayList<String> data = fetchData();
+            data.add(3, id.substring(0,4));
+            cli.createVerticalTable(headers, data);
+
+            ArrayList<String> options = new ArrayList<>();
+            options.add("Back");
+            options.add("Edit");
+
+
+            cli.createMenu(2, "SubMenu", null, options);
+
+            Scanner sc = new Scanner(System.in);
+            boolean inner;
+            do {
+                inner = false;
+                System.out.print("> ");
+                String inp = sc.nextLine();
+                switch (inp) {
+                    case "0" -> {
+                        //returns to previous method
+                    }
+                    case "1" -> {
+                        editPersonalDetails();
+                        outer = true;
+                    }
+                    default -> inner = true;
                 }
-                case "1" -> logout();
-                default -> runner = true;
-            }
-        } while(runner);
+            } while (inner);
+        }   while(outer);
     }
 
     @Override
     void editPersonalDetails() {
-
+        System.out.print("Enter your new Contact number = ");
+        Scanner sc = new Scanner(System.in);
+        String newContact = sc.nextLine();
+        String query = String.format(
+                "UPDATE %s " +
+                        "SET contact = '%s' " +
+                        "WHERE " +
+                        "id = '%s'", role, newContact, id);
+        try {
+            Statement stmt = connection.createStatement();
+            stmt.execute(query);
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
