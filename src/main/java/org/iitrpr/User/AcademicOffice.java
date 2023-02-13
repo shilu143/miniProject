@@ -17,8 +17,8 @@ public class AcademicOffice extends abstractUser{
 
             ArrayList<String> options = new ArrayList<>();
             options.add("Personal Details");
-            options.add("Edit Details");
-            options.add("Show Courses");
+            options.add("Show Events");
+            options.add("Show Course Catalog");
             options.add("Logout");
 
             CLI cli = new CLI();
@@ -32,13 +32,35 @@ public class AcademicOffice extends abstractUser{
                 String inp = sc.nextLine();
                 switch (inp) {
                     case "0" -> showPersonalDetails();
-                    case "1" -> editPersonalDetails();
+                    case "1" -> showEvents();
                     case "2" -> showAllCourse();
                     case "3" -> logout();
                     default -> runner = true;
                 }
             } while(runner);
         } while(!isLoggedout);
+    }
+
+    private void showEvents() {
+        try {
+            String query = "SELECT * FROM EVENT";
+
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            boolean _courseFloat = false;
+            boolean _courseReg = false;
+            boolean _semester = false;
+            int[] _session = null;
+            while (rs.next()) {
+                _courseFloat = rs.getBoolean("_coursefloat");
+                _courseReg = rs.getBoolean("_coursereg");
+                _semester = rs.getBoolean("_semester");
+                Array a = rs.getArray("_session");
+                _session = (int[])a.getArray();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

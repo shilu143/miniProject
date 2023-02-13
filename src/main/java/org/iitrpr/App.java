@@ -9,20 +9,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class App {
     public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
-
-
-
-
-
-
 
     boolean SUCCESS = true;
     boolean FAILURE = false;
@@ -73,9 +60,9 @@ public class App {
 
         String USER = dotenv.get("DB_USER");
         String PASS = dotenv.get("DB_PASS");
-
+        String dbName = "aimsdb";
         Connection connection = null;
-        String url = "jdbc:postgresql://localhost:5432/aimsdb";
+        String url = String.format("jdbc:postgresql://localhost:5432/%s", dbName);
         try {
             connection = DriverManager.getConnection(url, USER, PASS);
             if (connection != null) {

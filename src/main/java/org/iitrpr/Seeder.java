@@ -66,6 +66,20 @@ public class Seeder {
                         st.setString(4, email);
                         st.setString(5, contact);
                         st.executeUpdate();
+
+                        if(role.equalsIgnoreCase("student")) {
+                            query = String.format("CREATE TABLE %s (" +
+                                    "courseId varchar," +
+                                    "courseName varchar," +
+                                    "LTP integer[3]," +
+                                    "grade varchar," +
+                                    "session integer[2]," +
+                                    "PRIMARY KEY(courseId)" +
+                                    ")", "_" + id);
+                            Statement pstmt = connection.createStatement();
+                            pstmt.execute(query);
+                            pstmt.close();
+                        }
                         st.close();
                     } catch (SQLException exception) {
                         System.out.println(exception.getMessage());

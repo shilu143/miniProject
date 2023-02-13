@@ -67,9 +67,7 @@ abstract class abstractUser {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
-    void showPersonalDetails() {
-
-    };
+    abstract void showPersonalDetails();
     abstract void editPersonalDetails();
     abstract void showAllCourse();
     protected void logout() {

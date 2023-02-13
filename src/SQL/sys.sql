@@ -44,7 +44,6 @@ CREATE TABLE DEPARTMENT (
     PRIMARY KEY(deptid)
 );
 
-
 CREATE TABLE COURSE_CATALOG (
     id varchar,
     name varchar,
@@ -58,21 +57,34 @@ CREATE TABLE Y1_OFFERING (
     cgcriteria real,
     fid varchar[]
 );
+
 CREATE TABLE Y2_OFFERING (
     courseid varchar,
     cgcriteria real,
     fid varchar[]
 );
+
 CREATE TABLE Y3_OFFERING (
     courseid varchar,
     cgcriteria real,
     fid varchar[]
 );
+
 CREATE TABLE Y4_OFFERING (
     courseid varchar,
     cgcriteria real,
     fid varchar[]
 );
+
+CREATE TABLE EVENT (
+    _event integer,
+    _session integer[2]
+);
+
+insert into event values(0, ARRAY[2023,1]);
+
+
+
 
 
 
