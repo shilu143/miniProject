@@ -6,6 +6,8 @@ import java.util.Scanner;
 import org.mindrot.jbcrypt.*;
 import io.github.cdimascio.dotenv.Dotenv;
 
+import static java.lang.System.exit;
+
 
 public class App {
     public static final String ANSI_RESET = "\u001B[0m";
@@ -69,20 +71,22 @@ public class App {
                 System.out.println("Database Connection Successful");
             } else {
                 System.out.println("Database Connection Failed");
+                exit(0);
             }
         } catch (Exception exception) {
             System.out.println(exception.getMessage());
+            exit(0);
         }
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter your ID : ");
-        String username = sc.nextLine();
+        String username = sc.nextLine().trim();
         System.out.print("Enter your password : ");
-        String password = sc.nextLine();
+        String password = sc.nextLine().trim();
         while (!app.authenticate(connection, username, password)) {
             System.out.print("Enter your ID : ");
-            username = sc.nextLine();
+            username = sc.nextLine().trim();
             System.out.print("Enter your password : ");
-            password = sc.nextLine();
+            password = sc.nextLine().trim();
         }
 
         System.out.println("bye");

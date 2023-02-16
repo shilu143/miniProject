@@ -1,30 +1,26 @@
 package org.iitrpr.User;
 
+import org.iitrpr.utils.DataStorage;
+
 import java.sql.*;
 import java.util.*;
 
 abstract class abstractUser {
-    Map<String, String> deptMap = new HashMap<>();
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
+    DataStorage dataStorage;
 
     Connection connection;
     String id;
-    Boolean isLoggedout;
+    boolean isLoggedout;
+    Integer[] _CURR_SESSION;
+    int _EVENT;
     String role;
     abstractUser(Connection connection, String id, String role) {
         this.connection = connection;
         this.id = id;
         this.role = role;
         isLoggedout = false;
-        System.out.println(ANSI_CYAN + "\n\nAIMS PORTAL WELCOMES U ;)\n" + ANSI_RESET);
+        dataStorage = new DataStorage();
+        System.out.println(DataStorage.ANSI_CYAN + "\n\nAIMS PORTAL WELCOMES U ;)\n" + DataStorage.ANSI_RESET);
     }
 
     protected ArrayList<String> fetchData() {
@@ -42,10 +38,10 @@ abstract class abstractUser {
             String email = null;
             String contact = null;
             while(rs.next()) {
-                name = rs.getString("name");
-                dept = rs.getString("deptname");
-                email = rs.getString("email");
-                contact = rs.getString("contact");
+                name = rs.getString("name").trim();
+                dept = rs.getString("deptname").trim();
+                email = rs.getString("email").trim();
+                contact = rs.getString("contact").trim();
             }
 
             assert name != null;
@@ -57,6 +53,24 @@ abstract class abstractUser {
             result.add(email);
             result.add(contact);
             return result;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void fetchEvent() {
+        String query = "SELECT * FROM EVENT";
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                _EVENT = rs.getInt("_EVENT");
+                Array rsString = rs.getArray("_SESSION");
+                if (rsString != null) {
+                    _CURR_SESSION = (Integer[]) rsString.getArray();
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
