@@ -23,6 +23,61 @@ abstract class abstractUser {
         System.out.println(DataStorage.ANSI_CYAN + "\n\nAIMS PORTAL WELCOMES U ;)\n" + DataStorage.ANSI_RESET);
     }
 
+    protected String getFacultyName(String fid) {
+        String query = String.format("SELECT name from faculty where LOWER(id) = LOWER('%s')", fid);
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            if(rs.next()) {
+                return rs.getString("name");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return "";
+    }
+    protected boolean runQuery(String query, boolean response) {
+        try {
+            Statement stmt = connection.createStatement();
+            if(response) {
+                ResultSet rs = stmt.executeQuery(query);
+                return rs.isBeforeFirst();
+            }
+            else {
+                stmt.execute(query);
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+//    protected
+    protected ArrayList<ArrayList<String>> getAllDept() {
+        ArrayList<ArrayList<String>> data = new ArrayList<>();
+        try {
+            String query = "SELECT * FROM DEPARTMENT";
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                ArrayList<String> temp = new ArrayList<>();
+                String deptid = rs.getString("deptid");
+                if(!deptid.equalsIgnoreCase("acad")) {
+                    temp.add(rs.getString("deptid"));
+                    temp.add(rs.getString("deptname"));
+                    data.add(temp);
+                }
+            }
+            return data;
+        } catch (SQLException e) {
+            return null;
+        }
+
+    }
+
     protected ArrayList<String> fetchData() {
         PreparedStatement st = null;
         try {
@@ -76,6 +131,29 @@ abstract class abstractUser {
         }
     }
 
+    protected ArrayList<ArrayList<String>> fetchTable(String query) {
+        ArrayList<ArrayList<String>> data = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                ArrayList<String> temp = new ArrayList<>();
+                ResultSetMetaData rsmd = rs.getMetaData();
+                int n = rsmd.getColumnCount();
+                for(int i = 1;i <= n; i++) {
+                    String tp = rs.getString(i);
+                    temp.add(tp == null ? "":tp);
+                }
+                data.add(temp);
+            }
+            return data;
+        } catch (SQLException e) {
+            return null;
+//            throw new RuntimeException(e);
+        }
+    }
+
+
     abstract void showMenu();
     protected void clearScreen() {
         System.out.print("\033[H\033[2J");
@@ -83,7 +161,6 @@ abstract class abstractUser {
     }
     abstract void showPersonalDetails();
     abstract void editPersonalDetails();
-    abstract void showAllCourse();
     protected void logout() {
         isLoggedout = true;
     }

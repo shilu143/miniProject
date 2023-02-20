@@ -120,17 +120,19 @@ public class CLI {
 
         table.addRow(headerData).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);
         table.addRule();
-        headerData = new ArrayList<>();
-        for(int i = 0; i < options.size() - footerOptions.size(); i++) {
-            headerData.add(null);
+        if(footerOptions != null) {
+            headerData = new ArrayList<>();
+            for (int i = 0; i < options.size() - footerOptions.size(); i++) {
+                headerData.add(null);
+            }
+            for (int i = 0; i < footerOptions.size(); i++) {
+                headerData.add(String.format("%s : %s", footerOptions.get(i), footerData.get(i)));
+            }
+            table.addRow(headerData)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setPaddingLeftRight(1);
+            table.addRule();
         }
-        for(int i = 0;i < footerOptions.size(); i++){
-            headerData.add(String.format("%s : %s", footerOptions.get(i), footerData.get(i)));
-        }
-        table.addRow(headerData)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setPaddingLeftRight(1);
-        table.addRule();
 
         table.addRule();
         table.addRow(options).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);

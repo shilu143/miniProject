@@ -1,33 +1,23 @@
 package org.iitrpr;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
 
 public class TestingStuffs {
-    enum Status {
-        A("A", 10),
-        A_minus("A-", 9),
-        B("B", 8),
-        B_minus("B-", 7),
-        C("C", 6),
-        C_minus("C-", 5),
-        D("D", 4),
-        E("E", 2),
-        F("F", 0);
-
-        private final String key;
-        private final Integer value;
-
-        Status(String key, Integer value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public String getKey() {
-            return key;
-        }
-        public Integer getValue() {
-            return value;
-        }
-    }
-
     public static void main(String[] args) {
+        String myString = "cs2010";
+        String myRegex = "\\b(CS101|cs101|Computer Science 101)\\b";
+        boolean matches = myString.matches("^[a-z][a-z][1-9][0-9][0-9]$");
+
+        if (matches) {
+            System.out.println("The string matches the regex!");
+        } else {
+            System.out.println("The string does not match the regex.");
+        }
+
     }
 }

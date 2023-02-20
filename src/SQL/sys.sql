@@ -44,44 +44,12 @@ CREATE TABLE DEPARTMENT (
     PRIMARY KEY(deptid)
 );
 
-CREATE TABLE COURSE_CATALOG (
-    id varchar,
-    name varchar,
-    ltp integer[3],
-    prereq varchar[],
-    PRIMARY KEY(id)
-);
-
-CREATE TABLE Y1_OFFERING (
-    courseid varchar,
-    cgcriteria real,
-    fid varchar[]
-);
-
-CREATE TABLE Y2_OFFERING (
-    courseid varchar,
-    cgcriteria real,
-    fid varchar[]
-);
-
-CREATE TABLE Y3_OFFERING (
-    courseid varchar,
-    cgcriteria real,
-    fid varchar[]
-);
-
-CREATE TABLE Y4_OFFERING (
-    courseid varchar,
-    cgcriteria real,
-    fid varchar[]
-);
-
 CREATE TABLE EVENT (
     _event integer,
     _session integer[2]
 );
 
-insert into event values(0, ARRAY[2023,1]);
+insert into event values(4, ARRAY[2020,1]);
 
 
 

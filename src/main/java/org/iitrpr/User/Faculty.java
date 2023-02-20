@@ -33,7 +33,7 @@ public class Faculty extends abstractUser {
                 switch (inp) {
                     case "0" -> showPersonalDetails();
                     case "1" -> editPersonalDetails();
-                    case "2" -> showAllCourse();
+//                    case "2" -> showAllCourse();
                     case "3" -> logout();
                     default -> runner = true;
                 }
@@ -103,11 +103,6 @@ public class Faculty extends abstractUser {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    void showAllCourse() {
-
     }
 
 

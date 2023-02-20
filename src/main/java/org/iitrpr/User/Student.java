@@ -47,13 +47,65 @@ public class Student extends abstractUser {
         } while(!isLoggedout);
     }
 
+
+
     private void isGraduated() {
     }
 
     private void showCurrentEvent() {
     }
+    private ArrayList<ArrayList<String>> fetchOffering(String query) {
+        ArrayList<ArrayList<String>> data = new ArrayList<>();
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                String courseId = rs.getString("courseid").trim();
+                String courseName = rs.getString("coursename").trim();
+                String prereq = rs.getString("prereq");
+                String cgcriteria = rs.getString("cgcriteria");
+                String type = rs.getString("type");
+                String fid = rs.getString("fid");
+                ArrayList<String> temp = new ArrayList<>();
+                temp.add(courseId.toUpperCase());
+                temp.add(courseName);
+                temp.add(prereq != null ? prereq.toUpperCase() : "N/A");
+                temp.add(cgcriteria != null ? cgcriteria : "N/A");
+                temp.add(type);
+                temp.add(getFacultyName(fid).toUpperCase());
+                data.add(temp);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return data;
+    }
 
     private void showCourseOffering() {
+        clearScreen();
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Course ID");
+        options.add("Course Name");
+        options.add("Prerequisites");
+        options.add("CG Criteria");
+        options.add("Type");
+        options.add("Instructor");
+        ArrayList<ArrayList<String>> data;
+
+
+        CLI cli = new CLI();
+
+        String deptid = "cse"; //todo
+
+        String query = String.format("SELECT * FROM _%s_ where LOWER(type) <> LOWER('e')", deptid);
+        data = fetchOffering(query);
+        cli.recordPrint("Core Courses",options, data, null, null);
+        query = String.format("SELECT * FROM _%s_ where LOWER(type) = LOWER('e')", deptid);
+        data = fetchOffering(query);
+        cli.recordPrint("Elective Courses",options, data, null, null);
+        Scanner sc = new Scanner(System.in);
+        sc.nextLine();
     }
 
     private void studentRecord() {
@@ -64,7 +116,6 @@ public class Student extends abstractUser {
             CLI cli = new CLI();
             String query = String.format("SELECT DISTINCT session FROM _%s ORDER BY session ASC", id);
             float cumulativeEarnedCreated = 0;
-            float cumulativeSGPA = 0;
             int totalSemester = 0;
             float cumulativeTotalGP = 0;
             try {
@@ -122,7 +173,7 @@ public class Student extends abstractUser {
                         }
                         assert ltp != null;
                         int credits = ltp[0] + ltp[2]/2;
-                        ltpc =String.format("(%d-%d-%d-%d)",ltp[0], ltp[1], ltp[2], credits);
+                        ltpc = String.format("(%d-%d-%d-%d)",ltp[0], ltp[1], ltp[2], credits);
 
 
 
@@ -146,8 +197,7 @@ public class Student extends abstractUser {
                     if(status == DataStorage._COMPLETED) {
                         totalSemester++;
                         cumulativeTotalGP += totalGP;
-                        SGPA = (totalGP / earnedCredits);
-                        cumulativeSGPA += SGPA;
+                        SGPA = (totalGP / registeredCredits);
                     }
                     CGPA = (cumulativeTotalGP / cumulativeEarnedCreated);
 
@@ -274,7 +324,6 @@ public class Student extends abstractUser {
             options.add("Edit");
 
 
-//            cli.createMenu(2, "SubMenu", null, options);
             cli.createVSubmenu("SubMenu", null, options);
             Scanner sc = new Scanner(System.in);
             boolean inner;
@@ -321,7 +370,6 @@ public class Student extends abstractUser {
             options.add("Edit");
 
 
-//            cli.createMenu(2, "SubMenu", null, options);
             cli.createVSubmenu("SubMenu", null, options);
             Scanner sc = new Scanner(System.in);
             boolean inner;
@@ -356,9 +404,5 @@ public class Student extends abstractUser {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    void showAllCourse() {
     }
 }

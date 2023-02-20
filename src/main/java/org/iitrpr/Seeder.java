@@ -1,9 +1,13 @@
 package org.iitrpr;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.apache.commons.lang3.StringUtils;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -98,6 +102,70 @@ public class Seeder {
                         st.setString(2, deptName);
                         st.executeUpdate();
                         st.close();
+                        if(!deptId.equalsIgnoreCase("acad")) {
+                            Statement stmt = connection.createStatement();
+                            String query = String.format("CREATE TABLE _%s_ ( " +
+                                    "courseid varchar, " +
+                                    "coursename varchar, " +
+                                    "prereq varchar[], " +
+                                    "cgcriteria numeric(4, 2), " +
+                                    "type varchar, " +
+                                    "fid varchar, " +
+                                    "primary key(courseid) " +
+                                    ");", deptId);
+                            stmt.execute(query);
+
+                            stmt = connection.createStatement();
+                            query = String.format("CREATE TABLE COURSE_CATALOG_%s ( " +
+                                    "courseid varchar, " +
+                                    "coursename varchar, " +
+                                    "ltp integer[3], " +
+                                    "prereq varchar[], " +
+                                    "type varchar, " +
+                                    "batch integer, " +
+                                    "primary key(courseid, batch) " +
+                                    ");", deptId);
+                            stmt.execute(query);
+                            String csvFilePath = String.format("./assets/data/catalog_%s.csv", deptId);
+                            try {
+                                CSVReader csvReader = new CSVReader(new FileReader(csvFilePath));
+                                String[] record;
+                                csvReader.readNext();
+                                while ((record = csvReader.readNext()) != null) {
+                                    String courseId = record[0].trim().toLowerCase();
+                                    String courseName = record[1].trim();
+                                    String[] str_ltp = record[2].trim().split(",");
+                                    Integer[] ltp = new Integer[3];
+                                    for(int i = 0; i < str_ltp.length; i++) {
+                                        ltp[i] = Integer.parseInt(str_ltp[i]);
+                                    }
+                                    String temp = record[3];
+                                    String[] prereq;
+                                    if(temp.length() == 0) {
+                                        prereq = null;
+                                    }
+                                    else {
+                                        prereq = temp.split(",");
+                                        prereq = StringUtils.stripAll(prereq);
+                                    }
+                                    String type = record[4].trim().toLowerCase();
+                                    int batch = Integer.parseInt(record[5]);
+                                    query = String.format("insert into course_catalog_%s values(?,?,?,?,?,?)", deptId);
+                                    PreparedStatement pstmtt = connection.prepareStatement(query);
+                                    pstmtt.setString(1, courseId);
+                                    pstmtt.setString(2, courseName);
+                                    Array array = connection.createArrayOf("INTEGER", ltp);
+                                    pstmtt.setArray(3, array);
+                                    array = connection.createArrayOf("VARCHAR", prereq);
+                                    pstmtt.setArray(4, prereq == null ? null : array);
+                                    pstmtt.setString(5, type);
+                                    pstmtt.setInt(6, batch);
+                                    pstmtt.execute();
+                                }
+                            } catch (CsvValidationException | IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     } catch (SQLException exception) {
                         System.out.println(exception.getMessage());
                     }
