@@ -1,9 +1,9 @@
 package org.iitrpr.User;
 
+import org.iitrpr.TestingStuffs;
 import org.iitrpr.utils.CLI;
 import org.iitrpr.utils.DataStorage;
 
-import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,14 +40,263 @@ public class AcademicOffice extends abstractUser{
                 switch (inp) {
                     case "1" -> showPersonalDetails();
                     case "2" -> viewCourseCatalog();
-//                    case "3" -> showCourseOffering();
-//                    case "4" -> showCurrentEvent();
+                    case "3" -> showCourseOffering();
+                    case "4" -> viewStudentRecord();
 //                    case "5" -> isGraduated();
                     case "7" -> logout();
                     default -> runner = true;
                 }
             } while(runner);
         } while(!isLoggedout);
+    }
+
+    private void viewStudentRecord() {
+        String sId = null;
+        Scanner sc = new Scanner(System.in);
+        boolean isValid = false;
+        while(!isValid) {
+            System.out.print("Enter the Student ID = ");
+            sId = sc.next();
+            String query = String.format("select * from student where lower(id) = lower('%s')", sId);
+            if(runQuery(query, true)) {
+                isValid = true;
+            }
+            else {
+                System.out.println(DataStorage.ANSI_RED + "There is no student with that id" + DataStorage.ANSI_RESET);
+            }
+        }
+        String TRANSCRIPT = "";
+//        boolean outer;
+//        do {
+//            outer = false;
+            clearScreen();
+            CLI cli = new CLI();
+            String query = String.format("SELECT DISTINCT session FROM _%s ORDER BY session ASC", sId);
+            float cumulativeEarnedCreated = 0;
+            int totalSemester = 0;
+            float cumulativeTotalGP = 0;
+            try {
+                //Event fetching
+                fetchEvent();
+
+                Statement stmt = connection.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
+                while (rs.next()) {
+                    int status = DataStorage._COMPLETED;
+                    Array rsString = rs.getArray("session");
+                    ArrayList<String> options = new ArrayList<>();
+                    options.add("Course ID");
+                    options.add("Course Name");
+                    options.add("(L-T-P-C)");
+                    options.add("Status");
+                    options.add("Grade");
+
+                    ArrayList<ArrayList<String>> data = new ArrayList<>();
+                    Integer[] session = null;
+                    if (rsString != null) {
+                        session = (Integer[]) rsString.getArray();
+                    }
+                    assert session != null;
+
+                    if (Arrays.equals(_CURR_SESSION, session) && _EVENT < DataStorage._GRADE_SUBMISSION_END) {
+                        status = DataStorage._RUNNING;
+                    }
+
+                    query = String.format("SELECT * FROM _%s " +
+                            "WHERE session = ARRAY[%d, %d]", sId, session[0], session[1]);
+
+                    String header = String.format("Academic Session: %d-%d", session[0], session[1]);
+                    stmt = connection.createStatement();
+                    ResultSet rs2 = stmt.executeQuery(query);
+                    float earnedCredits = 0;
+                    float registeredCredits = 0;
+                    float SGPA = 0;
+                    float CGPA = 0;
+                    float totalGP = 0;
+                    while (rs2.next()) {
+                        String courseId = rs2.getString("courseid")
+                                .trim().
+                                toUpperCase();
+                        String courseName = rs2.getString("coursename").trim();
+                        Integer[] ltp = null;
+                        String ltpc = null;
+                        String grade = rs2.getString("grade");
+
+
+                        ArrayList<String> temp = new ArrayList<>();
+                        rsString = rs2.getArray("ltp");
+                        if (rsString != null) {
+                            ltp = (Integer[]) rsString.getArray();
+                        }
+                        assert ltp != null;
+                        int credits = ltp[0] + ltp[2] / 2;
+                        ltpc = String.format("(%d-%d-%d-%d)", ltp[0], ltp[1], ltp[2], credits);
+
+
+                        registeredCredits += credits;
+                        if (status == DataStorage._COMPLETED) {
+                            int gp = dataStorage.GradePointMap.get(grade);
+                            if (gp != 0) {
+                                earnedCredits += credits;
+                                cumulativeEarnedCreated += credits;
+                            }
+                            totalGP += (credits * gp);
+                        }
+
+                        temp.add(courseId);
+                        temp.add(courseName);
+                        temp.add(ltpc);
+                        temp.add(status == DataStorage._COMPLETED ? "Completed" : "Running");
+                        temp.add(status == DataStorage._COMPLETED ? grade : "N/A");
+                        data.add(temp);
+                    }
+                    if (status == DataStorage._COMPLETED) {
+                        totalSemester++;
+                        cumulativeTotalGP += totalGP;
+                        SGPA = (totalGP / registeredCredits);
+                    }
+                    CGPA = (cumulativeTotalGP / cumulativeEarnedCreated);
+
+                    ArrayList<String> footerOptions = new ArrayList<>();
+                    ArrayList<String> footerData = new ArrayList<>();
+                    footerOptions.add("Registered Credits");
+                    footerData.add(String.valueOf(registeredCredits));
+                    footerOptions.add("Earned Credits");
+                    footerData.add(String.valueOf((status == DataStorage._COMPLETED) ? earnedCredits : "N/A"));
+                    footerOptions.add("SGPA");
+                    footerData.add(String.valueOf((status == DataStorage._COMPLETED) ? SGPA : "N/A"));
+                    footerOptions.add("CGPA");
+                    footerData.add(String.valueOf(CGPA));
+                    TRANSCRIPT = cli.specialPrint(header, options, data, footerOptions, footerData);
+                }
+                stmt.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            ArrayList<String> options = new ArrayList<>();
+            options.add("Generate Transcript");
+            options.add("Back");
+            cli.createVSubmenu("SubMenu", null, options);
+            boolean runner;
+            do {
+                runner = false;
+                System.out.print("> ");
+                String input = sc.next();
+                switch (input) {
+                    case "1" -> {
+//                    generate transcript
+                        TestingStuffs.generateTranscript(sId, TRANSCRIPT);
+                        System.out.println(DataStorage.ANSI_GREEN + "Transcript Generated successfully in the documents folder" + DataStorage.ANSI_RESET);
+                        runner = true;
+                    }
+                    case "2" -> {
+//                    return back
+                    }
+
+                    default -> {
+                        runner = true;
+                    }
+                }
+            } while(runner);
+//        } while(outer);
+    }
+
+    private void showCourseOffering() {
+        clearScreen();
+        CLI cli = new CLI();
+        ArrayList<String> options = new ArrayList<>();
+        ArrayList<ArrayList<String>> dept = getAllDept();
+        for(var d : dept) {
+            options.add(d.get(1));
+        }
+        options.add("Back");
+        cli.createVSubmenu("Choose Department", null, options);
+        Scanner sc = new Scanner(System.in);
+        boolean runner;
+        do {
+            runner = false;
+            System.out.print("> ");
+            String inp = sc.nextLine().trim();
+            try {
+                int vl = Integer.parseInt(inp);
+                if(vl >= 1 && vl <= dept.size()) showDeptOffering(dept.get(vl - 1).get(0));
+                else if(vl == dept.size() + 1) {
+//                    return to previous method
+                }
+                else {
+                    runner = true;
+                }
+            } catch (NumberFormatException e) {
+                runner = true;
+            }
+        } while(runner);
+    }
+
+    private void showDeptOffering(String deptId) {
+        boolean validInput = false;
+        int year = 0;
+        while(!validInput) {
+            System.out.print("Enter year (1, 2, 3, 4) = ");
+            Scanner sc = new Scanner(System.in);
+            String inp = sc.next();
+            try{
+                year = Integer.parseInt(inp);
+                if(year < 1 || year > 4) {
+                    System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                }
+                else {
+                    validInput = true;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+            }
+        }
+
+        clearScreen();
+
+        String tabName = String.format("y%d_%s_offering", year, deptId);
+        String query = String.format("select t1.courseid , t2.coursename, t2.ltp, t2.prereq, t2.type, t1.cgcriteria, t3.name as Instructor\n" +
+                "from %s t1\n" +
+                "inner join course_catalog_%s t2 on t1.courseid = t2.courseid\n" +
+                "inner join faculty t3 on t1.fid=t3.id\n" +
+                "where lower(t2.type) <> lower('e')", tabName, deptId);
+        ArrayList<ArrayList<String>> data = fetchTable(query);
+        ArrayList<String> options  = new ArrayList<>();
+        options.add("Course ID");
+        options.add("Course Name");
+        options.add("LTP");
+        options.add("Prerequisites");
+        options.add("Type");
+        options.add("CG Criteria");
+        options.add("Instructor");
+        CLI cli = new CLI();
+        cli.recordPrint("Core Courses", options, data, null, null);
+        query = String.format("select t1.courseid , t2.coursename, t2.ltp, t2.prereq, t2.type, t1.cgcriteria, t3.name as Instructor\n" +
+                "from %s t1\n" +
+                "inner join course_catalog_%s t2 on t1.courseid = t2.courseid\n" +
+                "inner join faculty t3 on t1.fid=t3.id\n" +
+                "where lower(t2.type) = lower('e')", tabName, deptId);
+        data = fetchTable(query);
+        cli.recordPrint("Elective Courses", options, data, null, null);
+        options = new ArrayList<>();
+        options.add("Back");
+        cli.createVSubmenu("Sub Menu", null, options);
+        boolean runner;
+        do {
+            runner = false;
+            Scanner sc = new Scanner(System.in);
+            System.out.print("> ");
+            String inp = sc.next();
+            switch (inp) {
+                case "1" -> {
+//                    return back
+                }
+                default -> {
+                    runner = true;
+                }
+            }
+        } while(runner);
     }
 
     private void viewCourseCatalog() {
@@ -140,7 +389,7 @@ public class AcademicOffice extends abstractUser{
         Integer[] ltp = new Integer[3];
         String[] prereq = null;
         String type = null;
-        int batch = 2020;
+        int batch = _CURR_SESSION[0];
         boolean validInput = false;
         while(!validInput) {
             System.out.print("Enter the course ID = ");
@@ -168,10 +417,10 @@ public class AcademicOffice extends abstractUser{
         validInput = false;
         while(!validInput) {
             System.out.print("Enter ltp structure (l,t,p) = ");
-            sc.nextLine();
             String temp = sc.nextLine();
             if(isIntegerArray(temp)) {
                 String[] ttt = temp.split(",");
+                System.out.println(Arrays.toString(ttt));
                 for(int i = 0; i < ttt.length; i++) ltp[i] = Integer.parseInt(ttt[i].trim());
                 validInput = true;
             }
@@ -183,7 +432,6 @@ public class AcademicOffice extends abstractUser{
         validInput = false;
         while(!validInput) {
             System.out.print("Enter prerequisites (comma separated courseId) = ");
-            sc.nextLine();
             String tt = sc.nextLine();
             if(checkPrereq(tt, deptId)) {
                 prereq = tt.split(",");
@@ -216,6 +464,7 @@ public class AcademicOffice extends abstractUser{
             pstmt.setArray(4, arr);
             pstmt.setString(5, type);
             pstmt.setInt(6, batch);
+            pstmt.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

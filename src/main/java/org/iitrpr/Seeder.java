@@ -74,8 +74,10 @@ public class Seeder {
                         if(role.equalsIgnoreCase("student")) {
                             query = String.format("CREATE TABLE %s (" +
                                     "courseId varchar," +
+                                    //to be removed
                                     "courseName varchar," +
                                     "LTP integer[3]," +
+//                                    to be removed
                                     "grade varchar," +
                                     "session integer[2]," +
                                     "PRIMARY KEY(courseId)" +
@@ -164,6 +166,16 @@ public class Seeder {
                                 }
                             } catch (CsvValidationException | IOException e) {
                                 throw new RuntimeException(e);
+                            }
+                            for(int y = 1; y <= 4; y++) {
+                                query = String.format("""
+                                        create table y%d_%s_offering (
+                                            courseId  varchar,
+                                            cgcriteria numeric(4,2),
+                                            fid varchar
+                                        )""", y, deptId);
+                                stmt = connection.createStatement();
+                                stmt.execute(query);
                             }
                         }
                     } catch (SQLException exception) {

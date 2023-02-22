@@ -145,4 +145,46 @@ public class CLI {
         table.getRenderer().setCWC(new CWC_LongestLine());
         System.out.println(table.render()+"\n");
     }
+
+    public String specialPrint(String header, ArrayList<String>options,
+                            ArrayList<ArrayList<String>> data,
+                            ArrayList<String> footerOptions,
+                            ArrayList<String> footerData) {
+        AsciiTable table = new AsciiTable();
+        table.addRule();
+        ArrayList<String> headerData = new ArrayList<>();
+        for(int i = 0; i < options.size() - 1; i++) {
+            headerData.add(null);
+        }
+        headerData.add(header);
+
+        table.addRow(headerData).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);
+        table.addRule();
+        if(footerOptions != null) {
+            headerData = new ArrayList<>();
+            for (int i = 0; i < options.size() - footerOptions.size(); i++) {
+                headerData.add(null);
+            }
+            for (int i = 0; i < footerOptions.size(); i++) {
+                headerData.add(String.format("%s : %s", footerOptions.get(i), footerData.get(i)));
+            }
+            table.addRow(headerData)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setPaddingLeftRight(1);
+            table.addRule();
+        }
+
+        table.addRule();
+        table.addRow(options).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);
+        table.addRule();
+
+        for (ArrayList<String> datum : data) {
+            table.addRow(datum).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);
+            table.addRule();
+        }
+        table.getRenderer().setCWC(new CWC_LongestLine());
+        String render = table.render() + "\n";
+        System.out.println(render);
+        return render;
+    }
 }

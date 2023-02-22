@@ -51,6 +51,10 @@ CREATE TABLE EVENT (
 
 insert into event values(4, ARRAY[2020,1]);
 
+--select t1.courseid , t2.coursename, t2.ltp, t2.prereq, t2.type, t1.cgcriteria, t3.name as Instructor
+--from y1_cse_offering t1
+--inner join course_catalog_cse t2 on t1.courseid = t2.courseid
+--inner join faculty t3 on t1.fid=t3.id;
 
 
 
