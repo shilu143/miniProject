@@ -49,15 +49,15 @@ public class Faculty extends abstractUser {
             clearScreen();
             CLI cli = new CLI();
 
-            ArrayList<String> headers = new ArrayList<>();
-            headers.add("name");
-            headers.add("id");
-            headers.add("role");
-            headers.add("department");
-            headers.add("email");
-            headers.add("contact no.");
+            ArrayList<String> Options = new ArrayList<>();
+            Options.add("name");
+            Options.add("id");
+            Options.add("role");
+            Options.add("department");
+            Options.add("email");
+            Options.add("contact no.");
             ArrayList<String> data = fetchData();
-            cli.createVerticalTable(headers, data);
+            cli.createVerticalTable("Personal Details", Options, data);
 
             ArrayList<String> options = new ArrayList<>();
             options.add("Back");

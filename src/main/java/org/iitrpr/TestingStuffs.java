@@ -44,9 +44,9 @@ public class TestingStuffs {
             // Create the new file
             boolean success = file.createNewFile();
             if (success) {
-                System.out.println("File created successfully.");
+//                System.out.println("File created successfully.");
             } else {
-                System.out.println("File already exists.");
+//                System.out.println("File already exists.");
             }
         } catch (IOException e) {
             System.out.println("An error occurred while creating the file.");
@@ -62,7 +62,7 @@ public class TestingStuffs {
             // Close the FileWriter object to ensure that any data in its buffer is flushed to the file and any system resources used by the object are released.
             writer.close();
 
-            System.out.println("Successfully wrote to the file.");
+//            System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

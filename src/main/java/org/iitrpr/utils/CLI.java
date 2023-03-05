@@ -62,12 +62,32 @@ public class CLI {
         System.out.println(menuTable.render() + "\n\n");
     }
 
-    public void createVerticalTable(ArrayList<String> options, ArrayList<String> data) {
+
+    public void createDiff(String header, ArrayList<String> title,  ArrayList<String> options, ArrayList<Float> req, ArrayList<Float> actual) {
+        AsciiTable table = new AsciiTable();
+        table.addRule();
+        table.addRow(null, null, header).setTextAlignment(TextAlignment.CENTER);
+        table.addRule();
+        table.addRow(title)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setPaddingLeftRight(1);
+        table.addRule();
+        for(int i = 0; i < options.size(); i++) {
+            table.addRow(options.get(i), req.get(i), actual.get(i))
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setPaddingLeftRight(1);
+            table.addRule();
+        }
+        table.getRenderer().setCWC(new CWC_LongestLine());
+        System.out.println(table.render() + "\n\n");
+    }
+
+    public void createVerticalTable(String header, ArrayList<String> options, ArrayList<String> data) {
         assert options.size() == data.size();
 
         AsciiTable table = new AsciiTable();
         table.addRule();
-        table.addRow(null, "PERSONAL DETAILS").setTextAlignment(TextAlignment.CENTER);
+        table.addRow(null, header).setTextAlignment(TextAlignment.CENTER);
         table.addRule();
 
         for(int i = 0;i < options.size();i++) {

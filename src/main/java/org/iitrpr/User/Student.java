@@ -307,19 +307,19 @@ public class Student extends abstractUser {
             clearScreen();
             CLI cli = new CLI();
 
-            ArrayList<String> headers = new ArrayList<>();
-            headers.add("name");
-            headers.add("id");
-            headers.add("role");
-            headers.add("batch");
-            headers.add("department");
-            headers.add("email");
-            headers.add("contact no.");
+            ArrayList<String> options = new ArrayList<>();
+            options.add("name");
+            options.add("id");
+            options.add("role");
+            options.add("batch");
+            options.add("department");
+            options.add("email");
+            options.add("contact no.");
             ArrayList<String> data = fetchData();
             data.add(3, id.substring(0,4));
-            cli.createVerticalTable(headers, data);
+            cli.createVerticalTable("Personal Details", options, data);
 
-            ArrayList<String> options = new ArrayList<>();
+            options = new ArrayList<>();
             options.add("Back");
             options.add("Edit");
 
@@ -353,19 +353,19 @@ public class Student extends abstractUser {
             clearScreen();
             CLI cli = new CLI();
 
-            ArrayList<String> headers = new ArrayList<>();
-            headers.add("name");
-            headers.add("id");
-            headers.add("role");
-            headers.add("batch");
-            headers.add("department");
-            headers.add("email");
-            headers.add("contact no.");
+            ArrayList<String> options = new ArrayList<>();
+            options.add("name");
+            options.add("id");
+            options.add("role");
+            options.add("batch");
+            options.add("department");
+            options.add("email");
+            options.add("contact no.");
             ArrayList<String> data = fetchData();
             data.add(3, id.substring(0,4));
-            cli.createVerticalTable(headers, data);
+            cli.createVerticalTable("Personal Details", options, data);
 
-            ArrayList<String> options = new ArrayList<>();
+            options = new ArrayList<>();
             options.add("Back");
             options.add("Edit");
 

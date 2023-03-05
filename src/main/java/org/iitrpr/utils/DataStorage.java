@@ -1,10 +1,11 @@
 package org.iitrpr.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DataStorage {
     public final HashMap<String, Integer> GradePointMap = new HashMap<String, Integer>();
-
+    public final ArrayList<String> EventHash = new ArrayList<>();
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
@@ -34,5 +35,14 @@ public class DataStorage {
         GradePointMap.put("D", 4);
         GradePointMap.put("E", 2);
         GradePointMap.put("F", 0);
+
+        EventHash.add("Semester has Started");
+        EventHash.add("Course Float Event has Started");
+        EventHash.add("Course Float Event has Ended");
+        EventHash.add("Course Registration has Started");
+        EventHash.add("Course Registration has Ended");
+        EventHash.add("Grade Submission Event has Started");
+        EventHash.add("Grade Submission Event has Ended");
+        EventHash.add("Semester Ended");
     }
 }

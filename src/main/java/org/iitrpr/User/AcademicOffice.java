@@ -12,6 +12,7 @@ import java.util.Scanner;
 public class AcademicOffice extends abstractUser{
     public AcademicOffice(Connection connection, String id, String role) {
         super(connection, id, role);
+
     }
 
     @Override
@@ -42,12 +43,213 @@ public class AcademicOffice extends abstractUser{
                     case "2" -> viewCourseCatalog();
                     case "3" -> showCourseOffering();
                     case "4" -> viewStudentRecord();
-//                    case "5" -> isGraduated();
+                    case "5" -> currentEvent();
+                    case "6" -> graduationCheck();
                     case "7" -> logout();
                     default -> runner = true;
                 }
             } while(runner);
         } while(!isLoggedout);
+    }
+
+    private void graduationCheck() {
+        String sId = null;
+        Scanner sc = new Scanner(System.in);
+        boolean isValid = false;
+        while(!isValid) {
+            System.out.print("Enter the Student ID = ");
+            sId = sc.next();
+            String query = String.format("select * from student where lower(id) = lower('%s')", sId);
+            if(runQuery(query, true)) {
+                isValid = true;
+            }
+            else {
+                System.out.println(DataStorage.ANSI_RED + "There is no student with that id" + DataStorage.ANSI_RESET);
+            }
+        }
+        ArrayList<Float> earnedCredits = new ArrayList<>();
+        try {
+            String query = generateQuery(sId.substring(0, 4),"pc");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+            query = generateQuery(sId.substring(0, 4),"ec");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+            query = generateQuery(sId.substring(0, 4),"e");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        clearScreen();
+
+        CLI cli = new CLI();
+//        cli.
+        ArrayList<String> title = new ArrayList<>();
+        title.add("Course Type");
+        title.add("Required Credits");
+        title.add("Earned Credits");
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Program Core");
+        options.add("Engineering Core");
+        options.add("Elective");
+        String query = "SELECT * FROM UG_REQ";
+        ArrayList<String> temp = fetchTable(query).get(0);
+        ArrayList<Float> req = new ArrayList<>();
+        for(String vl : temp) {
+            req.add(Float.parseFloat(vl));
+        }
+        cli.createDiff("UG CRITERIA", title, options, req, earnedCredits);
+        boolean flag = true;
+        for(int i = 0; i < req.size(); i++) {
+            if(earnedCredits.get(i) < req.get(i)) {
+                flag = false;
+                break;
+            }
+        }
+        if(flag) {
+            System.out.println("Graduated : " + DataStorage.ANSI_GREEN + "YES" + DataStorage.ANSI_RESET + "\n");
+        }
+        else {
+            System.out.println("Graduated : " + DataStorage.ANSI_RED + "NO" + DataStorage.ANSI_RESET + "\n");
+        }
+        options = new ArrayList<>();
+        options.add("Back");
+        cli.createVSubmenu("Submenu", null, options);
+        System.out.print("> ");
+        String inp = sc.next().trim();
+        boolean runner;
+        do {
+            runner = false;
+            switch (inp) {
+                case "1" -> {
+                //Back
+                }
+                default -> {
+                    runner = true;
+                }
+            }
+        } while(runner);
+    }
+
+    private String generateQuery(String batch, String type) {
+        return String.format("""
+                SELECT SUM(LTP[1] + LTP[2] / 2) AS credits
+                FROM (
+                    SELECT t1.courseid, t2.batch, t2.ltp, t2.type, t1.grade
+                    FROM _2020csb1102 t1
+                    INNER JOIN course_catalog_cse t2
+                        ON t2.courseid = t1.courseid
+                ) table1
+                INNER JOIN (
+                  SELECT courseid, MAX(batch) as max_value
+                  FROM course_catalog_cse table2
+                  WHERE batch <= %s
+                  GROUP BY courseid
+                ) subquery
+                ON table1.courseid = subquery.courseid
+                   AND table1.batch = subquery.max_value
+                WHERE table1.type = lower('%s') AND table1.grade IS NOT NULL
+                    AND LOWER(table1.grade) <> 'f'""", batch, type);
+    }
+
+
+    private void currentEvent() {
+        boolean outer;
+        do {
+            outer = false;
+            clearScreen();
+            fetchEvent();
+            CLI cli = new CLI();
+            ArrayList<String> options = new ArrayList<>();
+            ArrayList<String> data = new ArrayList<>();
+            options.add("Academic Session");
+            options.add("Current Event");
+            data.add(String.format("%d - %d", _CURR_SESSION[0], _CURR_SESSION[1]));
+            data.add(String.format("%s", dataStorage.EventHash.get(_EVENT)));
+            cli.createVerticalTable("EVENT", options, data);
+
+            options = new ArrayList<>();
+            options.add("Create New Event");
+            options.add("Back");
+            cli.createVSubmenu("SubMenu", null, options);
+            Scanner sc = new Scanner(System.in);
+            boolean runner;
+            do {
+                runner = false;
+                System.out.print("> ");
+                String inp = sc.nextLine();
+                switch (inp) {
+                    case "1" -> {
+                        createNewEvent();
+                        outer = true;
+                    }
+                    case "2" -> {
+//                    back
+                    }
+                    default -> runner = true;
+                }
+            } while (runner);
+        } while(outer);
+    }
+
+    private void createNewEvent() {
+        clearScreen();
+        CLI cli = new CLI();
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Start new Semester");
+        options.add("Start Course Float Event");
+        options.add("End Course Float Event");
+        options.add("Start Course Registration Event");
+        options.add("End Course Registration Event");
+        options.add("Start Grade Submission Event");
+        options.add("End Grade Submission Event");
+        options.add("End the Semester");
+        options.add("Back");
+        cli.createVSubmenu("SubMenu", null, options);
+        Scanner sc = new Scanner(System.in);
+        boolean runner;
+        do {
+            runner = false;
+            System.out.print("> ");
+            String inp = sc.nextLine().trim();
+            try {
+                int vl = Integer.parseInt(inp);
+                if(vl >= 1 &&  vl <= 8) {
+                    int temp = vl - 2;
+                    temp = (temp < 0 ? DataStorage._SEMESTER_END : temp);
+                    if(_EVENT == temp) {
+                        String query;
+                        if(vl - 1 == DataStorage._SEMESTER_START) {
+                            if(_CURR_SESSION[1] == 2) {
+                                _CURR_SESSION[0]++;
+                                _CURR_SESSION[1] = 1;
+                            }
+                            else {
+                                _CURR_SESSION[1] = 2;
+                            }
+                            query = String.format("UPDATE EVENT SET _EVENT = 0, " +
+                                    "_SESSION = ARRAY[%d, %d]", _CURR_SESSION[0], _CURR_SESSION[1]);
+                        }
+                        else {
+                            query = String.format("UPDATE EVENT SET _EVENT = %d", vl - 1);
+                        }
+                        runQuery(query, false);
+                    }
+                    else {
+                        System.out.println(DataStorage.ANSI_RED + "Not allowed to create this Event" + DataStorage.ANSI_RESET);
+                        runner = true;
+                    }
+                }
+                else if (vl == 9) {
+//                    BACK
+                }
+                else {
+                    runner = true;
+                }
+            }
+            catch (NumberFormatException exception){
+                runner = true;
+            }
+        } while(runner);
     }
 
     private void viewStudentRecord() {
@@ -65,7 +267,25 @@ public class AcademicOffice extends abstractUser{
                 System.out.println(DataStorage.ANSI_RED + "There is no student with that id" + DataStorage.ANSI_RESET);
             }
         }
-        String TRANSCRIPT = "";
+
+        ResultSet studentData = getResultSet(String.format("select * from student  inner join department on department.deptid = student.deptid where lower(student.id) = lower('%s')", sId));
+        StringBuilder TRANSCRIPT = new StringBuilder();
+
+        try {
+            TRANSCRIPT.append("\nName : ");
+            TRANSCRIPT.append(studentData.getString("name").toUpperCase());
+            TRANSCRIPT.append("\nID : ");
+            TRANSCRIPT.append(studentData.getString("id").toUpperCase());
+            TRANSCRIPT.append("\nDepartment : ");
+            TRANSCRIPT.append(studentData.getString("deptname"));
+            TRANSCRIPT.append("\nEmail : ");
+            TRANSCRIPT.append(studentData.getString("email"));
+            TRANSCRIPT.append("\nContact : ");
+            TRANSCRIPT.append(studentData.getString("contact"));
+            TRANSCRIPT.append("\n\n");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 //        boolean outer;
 //        do {
 //            outer = false;
@@ -167,7 +387,7 @@ public class AcademicOffice extends abstractUser{
                     footerData.add(String.valueOf((status == DataStorage._COMPLETED) ? SGPA : "N/A"));
                     footerOptions.add("CGPA");
                     footerData.add(String.valueOf(CGPA));
-                    TRANSCRIPT = cli.specialPrint(header, options, data, footerOptions, footerData);
+                    TRANSCRIPT.append(cli.specialPrint(header, options, data, footerOptions, footerData)).append("\n\n");
                 }
                 stmt.close();
             } catch (SQLException e) {
@@ -186,7 +406,7 @@ public class AcademicOffice extends abstractUser{
                 switch (input) {
                     case "1" -> {
 //                    generate transcript
-                        TestingStuffs.generateTranscript(sId, TRANSCRIPT);
+                        TestingStuffs.generateTranscript(sId, TRANSCRIPT.toString());
                         System.out.println(DataStorage.ANSI_GREEN + "Transcript Generated successfully in the documents folder" + DataStorage.ANSI_RESET);
                         runner = true;
                     }
@@ -669,29 +889,7 @@ public class AcademicOffice extends abstractUser{
         }
         return true;
     }
-
-
-    private void showEvents() {
-        try {
-            String query = "SELECT * FROM EVENT";
-
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            boolean _courseFloat = false;
-            boolean _courseReg = false;
-            boolean _semester = false;
-            int[] _session = null;
-            while (rs.next()) {
-                _courseFloat = rs.getBoolean("_coursefloat");
-                _courseReg = rs.getBoolean("_coursereg");
-                _semester = rs.getBoolean("_semester");
-                Array a = rs.getArray("_session");
-                _session = (int[])a.getArray();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    
 
     @Override
     void showPersonalDetails() {
@@ -701,15 +899,15 @@ public class AcademicOffice extends abstractUser{
             clearScreen();
             CLI cli = new CLI();
 
-            ArrayList<String> headers = new ArrayList<>();
-            headers.add("name");
-            headers.add("id");
-            headers.add("role");
-            headers.add("department");
-            headers.add("email");
-            headers.add("contact no.");
+            ArrayList<String> Options = new ArrayList<>();
+            Options.add("name");
+            Options.add("id");
+            Options.add("role");
+            Options.add("department");
+            Options.add("email");
+            Options.add("contact no.");
             ArrayList<String> data = fetchData();
-            cli.createVerticalTable(headers, data);
+            cli.createVerticalTable("Personal Details", Options, data);
 
             ArrayList<String> options = new ArrayList<>();
             options.add("Back");

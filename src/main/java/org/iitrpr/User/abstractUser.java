@@ -154,6 +154,19 @@ abstract class abstractUser {
     }
 
 
+    protected ResultSet getResultSet(String query) {
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            rs.next();
+            return rs;
+        } catch (SQLException e) {
+            return null;
+//            throw new RuntimeException(e);
+        }
+    }
+
+
 
 
     abstract void showMenu();
