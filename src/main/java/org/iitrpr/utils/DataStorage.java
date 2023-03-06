@@ -30,14 +30,24 @@ public class DataStorage {
     public static final int _OFFICE = 2;
     public DataStorage() {
         GradePointMap.put("A", 10);
+        GradePointMap.put("a", 10);
         GradePointMap.put("A-", 9);
+        GradePointMap.put("a-", 9);
         GradePointMap.put("B", 8);
+        GradePointMap.put("b", 8);
         GradePointMap.put("B-", 7);
+        GradePointMap.put("b-", 7);
         GradePointMap.put("C", 6);
+        GradePointMap.put("c", 6);
         GradePointMap.put("C-", 5);
+        GradePointMap.put("c-", 5);
         GradePointMap.put("D", 4);
+        GradePointMap.put("d", 4);
         GradePointMap.put("E", 2);
+        GradePointMap.put("e", 2);
         GradePointMap.put("F", 0);
+        GradePointMap.put("f", 0);
+
 
         EventHash.add("Semester has Started");
         EventHash.add("Course Float Event has Started");

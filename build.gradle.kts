@@ -19,10 +19,7 @@ dependencies {
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("de.vandermeer:asciitable:0.3.2")
     implementation("com.opencsv:opencsv:5.7.1")
-    // https://mvnrepository.com/artifact/org.jacoco/org.jacoco.agent
     testImplementation("org.jacoco:org.jacoco.agent:0.8.8")
-
-
 }
 
 application {

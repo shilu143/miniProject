@@ -91,8 +91,7 @@ public class Seeder {
                             query = String.format("CREATE TABLE %s (" +
                                     "courseId varchar," +
                                     "sid varchar," +
-                                    "session integer[2]," +
-                                    "PRIMARY KEY(courseId)" +
+                                    "session integer[2]" +
                                     ")", "_" + id);
                             Statement pstmt = connection.createStatement();
                             pstmt.execute(query);

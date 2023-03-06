@@ -7,7 +7,11 @@ import java.util.Scanner;
 import org.iitrpr.utils.CLI;
 import org.iitrpr.utils.DataStorage;
 
+import javax.swing.plaf.nimbus.State;
+import javax.xml.crypto.Data;
+
 public class Student extends abstractUser {
+    Float _CGPA = 0.0f;
     public Student(Connection connection, String id, String role) {
         super(connection, id, role);
     }
@@ -51,7 +55,7 @@ public class Student extends abstractUser {
                 String inp = sc.nextLine();
                 switch (inp) {
                     case "1" -> showPersonalDetails(DataStorage._STUDENT);
-                    case "2" -> studentRecord();
+                    case "2" -> studentRecord(false);
                     case "3" -> showCourseOffering();
                     case "4" -> showCurrentEvent();
                     case "5" -> isGraduated();
@@ -215,6 +219,15 @@ public class Student extends abstractUser {
             System.out.println(DataStorage.ANSI_RED + "You have already done this course previously" + DataStorage.ANSI_RESET);
             return;
         }
+        query = String.format("""
+            SELECT * FROM _%s
+            WHERE lower(courseid) = lower('%s')
+                and session = array[%d,%d]
+                """, id, courseId, _CURR_SESSION[0], _CURR_SESSION[1]);
+        if(runQuery(query, true)) {
+            System.out.println(DataStorage.ANSI_BLUE + "You have already registered this course" + DataStorage.ANSI_RESET);
+            return;
+        }
 //        System.out.println(data);
         Float credit = getCourseCredit(courseId, year, deptId, id.substring(0,4));
 //        System.out.println(credit);
@@ -243,17 +256,103 @@ public class Student extends abstractUser {
             System.out.println("Credit Limit exceeded");
             return;
         }
-        System.out.println("OK credit check ok");
+//        System.out.println("OK credit check ok");
         query  = String.format("""
                 SELECT *
                 from course_catalog_%s t1
                 inner join (
                 SELECT courseid, MAX(batch) as max_value
                 FROM course_catalog_%s table2
-                WHERE batch <= 2020
-                    and courseid = 'cs201'
+                WHERE batch <= %s
+                    and lower(courseid) = lower('%s')
                 GROUP BY courseid) t2 on t1.courseid = t2.courseid and t1.batch = t2.max_value;
-                """, deptId, deptId);
+                """, deptId, deptId, id.substring(0, 4), courseId);
+
+        float cgCriteria = 0.0f;
+        try {
+            Statement stmt = null;
+            stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                Array temp = rs.getArray("prereq");
+                String[] prereq = null;
+                if(temp!=null)
+                    prereq = (String[])temp.getArray();
+                if(prereq != null) {
+                    for (var crs : prereq) {
+                        query = String.format("""
+                                SELECT * FROM _%s
+                                WHERE lower(courseid) = lower('%s')
+                                    and grade is not null and lower(grade) <> 'f'
+                                    """, id, crs);
+                        if (runQuery(query, true)) {
+                            System.out.println(DataStorage.ANSI_RED + "You do not satisfied the prerequisite for this course" + DataStorage.ANSI_RESET);
+                            return;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        query = String.format("SELECT cgcriteria from y%d_%s_offering where lower(courseid) = lower('%s')", year, deptId, courseId);
+        data = fetchTable(query);
+        if(data.get(0).get(0).isEmpty()) {
+            cgCriteria = 0.0f;
+        }
+        else {
+            cgCriteria = Float.parseFloat(data.get(0).get(0));
+        }
+        studentRecord(true);
+        if(_CGPA < cgCriteria) {
+            System.out.println("Not satisfying cgcriteria");
+            return;
+        }
+//        System.out.println("Done prerequisites");
+        query  = String.format("""
+                SELECT t1.courseid, t1.coursename, t1.ltp, t1.prereq, t3.fid
+                from course_catalog_%s t1
+                inner join (
+                SELECT courseid, MAX(batch) as max_value
+                FROM course_catalog_%s table2
+                WHERE batch <= %s
+                    and lower(courseid) = lower('%s')
+                GROUP BY courseid) t2 on t1.courseid = t2.courseid and t1.batch = t2.max_value
+                inner join y%d_%s_offering t3 on t1.courseid = t3.courseid;
+                """, deptId, deptId, id.substring(0, 4), courseId, year, deptId);
+//        System.out.println(query);
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                query = String.format("""
+                insert into _%s
+                (courseid, coursename, ltp, prereq, fid, session)
+                values(?, ?, ?, ?, ?, ?)
+                """, id);
+                PreparedStatement pstmt = connection.prepareStatement(query);
+                pstmt.setString(1, rs.getString("courseid"));
+                pstmt.setString(2, rs.getString("coursename"));
+                pstmt.setArray(3, rs.getArray("ltp"));
+                pstmt.setArray(4, rs.getArray("prereq"));
+                pstmt.setString(5, rs.getString("fid"));
+                Array temp = connection.createArrayOf("INT", _CURR_SESSION);
+                pstmt.setArray(6, temp);
+                pstmt.execute();
+                query = String.format("insert into _%s values('%s', '%s', array[%d, %d])",
+                        rs.getString("fid"),
+                        rs.getString("courseid"),
+                        id,
+                        _CURR_SESSION[0],
+                        _CURR_SESSION[1]
+                        );
+//                System.out.println(query);
+                runQuery(query, false);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(DataStorage.ANSI_GREEN + "Course Enrolled Successfully" + DataStorage.ANSI_RESET);
     }
 
     private Float fetchCreditLimit(String deptId, Integer year) {
@@ -326,11 +425,12 @@ public class Student extends abstractUser {
         return data;
     }
 
-    private void studentRecord() {
+    private void studentRecord(boolean flag) {
         boolean outer;
         do {
             outer = false;
-            clearScreen();
+            if(!flag)
+                clearScreen();
             CLI cli = new CLI();
             String query = String.format("SELECT DISTINCT session FROM _%s ORDER BY session ASC", id);
             float cumulativeEarnedCreated = 0;
@@ -417,7 +517,10 @@ public class Student extends abstractUser {
                         cumulativeTotalGP += totalGP;
                         SGPA = (totalGP / registeredCredits);
                     }
-                    CGPA = (cumulativeTotalGP / cumulativeEarnedCreated);
+                    if(cumulativeEarnedCreated == 0) CGPA = 0;
+                    else    CGPA = (cumulativeTotalGP / cumulativeEarnedCreated);
+                    _CGPA = CGPA;
+
 
                     ArrayList<String> footerOptions = new ArrayList<>();
                     ArrayList<String> footerData = new ArrayList<>();
@@ -429,7 +532,8 @@ public class Student extends abstractUser {
                     footerData.add(String.valueOf((status == DataStorage._COMPLETED) ? SGPA : "N/A"));
                     footerOptions.add("CGPA");
                     footerData.add(String.valueOf(CGPA));
-                    cli.recordPrint(header, options, data, footerOptions, footerData);
+                    if(!flag)
+                        cli.recordPrint(header, options, data, footerOptions, footerData);
                 }
                 stmt.close();
             } catch (SQLException e) {
@@ -437,21 +541,20 @@ public class Student extends abstractUser {
             }
 
             ArrayList<String> options = new ArrayList<>();
-            options.add("Back");
             options.add("Course Drop");
-            cli.createVSubmenu("SubMenu", null, options);
+            options.add("Back");
+            if(!flag)
+                cli.createVSubmenu("SubMenu", null, options);
 
             Scanner sc = new Scanner(System.in);
             boolean inner;
             do {
+                if(flag) break;
                 inner = false;
                 System.out.print("> ");
                 String inp = sc.nextLine();
                 switch (inp) {
                     case "1" -> {
-                        //returns to previous method
-                    }
-                    case "2" -> {
                         if(courseDrop()) {
                             outer = true;
                         }
@@ -459,9 +562,13 @@ public class Student extends abstractUser {
                             inner = true;
                         }
                     }
+                    case "2" -> {
+                        //returns to previous method
+                    }
                     default -> inner = true;
                 }
             } while (inner);
+            if(flag) break;
         } while(outer);
     }
 
@@ -490,9 +597,23 @@ public class Student extends abstractUser {
                     fetchEvent();
                     if(Arrays.equals(session, _CURR_SESSION)) {
                         if(_EVENT == DataStorage._COURSE_REG_START) {
-                            query = String.format("DELETE FROM _%s WHERE courseid = LOWER('%s')", id, courseid);
+                            query = String.format("SELECT fid from _%s where lower(courseid) = lower('%s') and session = array[%d, %d]",
+                                    id,
+                                    courseid,
+                                    _CURR_SESSION[0],
+                                    _CURR_SESSION[1]);
+                            String fid = getResultSet(query).getString("fid");
+                            query = String.format("DELETE FROM _%s WHERE courseid = LOWER('%s') and session = array[%d, %d]",
+                                    id, courseid, _CURR_SESSION[0], _CURR_SESSION[1]);
                             stmt = connection.createStatement();
                             stmt.execute(query);
+                            query = String.format("""
+                                    DELETE FROM _%s
+                                    WHERE LOWER(courseid) = LOWER('%s')
+                                    and LOWER(sid) = LOWER('%s')
+                                    and session = array[%d, %d]
+                                    """, fid, courseid, id, _CURR_SESSION[0], _CURR_SESSION[1]);
+                            runQuery(query, false);
                             System.out.println("Course Dropped Successfully");
                             return true;
                         }

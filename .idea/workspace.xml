@@ -7,9 +7,7 @@
     <list default="true" id="235fdb59-42ee-49a2-bb43-4aeb73ebbbee" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SQL/sys.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/SQL/sys.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/Seeder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/Seeder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AcademicOffice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AcademicOffice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/abstractUser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/abstractUser.java" afterDir="false" />
@@ -90,16 +88,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;18&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.new.ui&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "jdk.selected.JAVA_MODULE": "18",
+    "last_opened_file_path": "/home/shilu/IdeaProjects/Calculator",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.new.ui"
   }
-}</component>
+}]]></component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="fetch" />

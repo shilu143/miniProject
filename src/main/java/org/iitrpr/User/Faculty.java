@@ -52,17 +52,39 @@ public class Faculty extends abstractUser {
         do {
             outer = false;
             clearScreen();
+            String query = String.format("""
+                    SELECT *
+                    FROM _gunturi
+                    
+                    """);
+            ArrayList<String> options = new ArrayList<>();
+            options.add("Upload Grades");
+            options.add("Back");
+            CLI cli = new CLI();
+            cli.createVSubmenu("SubMenu", null, options);
             Scanner sc = new Scanner(System.in);
-            String inp = sc.nextLine();
-            switch (inp) {
-                case "1" -> {
-
+            boolean runner;
+            do {
+                runner = false;
+                System.out.println("> ");
+                String inp = sc.nextLine();
+                switch (inp) {
+                    case "1" -> {
+                        uploadGrades();
+                        runner = true;
+                    }
+                    case "2" -> {
+//                    return back
+                    }
+                    default -> {
+                        runner = true;
+                    }
                 }
-                default -> {
-                    outer = true;
-                }
-            }
+            } while(runner);
         } while(outer);
+    }
+
+    private void uploadGrades() {
     }
 
 

@@ -342,6 +342,13 @@ abstract class abstractUser {
                             else {
                                 _CURR_SESSION[1] = 2;
                             }
+                            ArrayList<ArrayList<String>> Alldept = getAllDept();
+                            for(var dept : Alldept) {
+                                for(int yr = 1; yr <= 4; yr++) {
+                                    query = String.format("DELETE FROM y%d_%s_offering", yr, dept.get(0));
+                                    runQuery(query, false);
+                                }
+                            }
                             query = String.format("UPDATE EVENT SET _EVENT = 0, " +
                                     "_SESSION = ARRAY[%d, %d]", _CURR_SESSION[0], _CURR_SESSION[1]);
                         }
@@ -349,6 +356,7 @@ abstract class abstractUser {
                             query = String.format("UPDATE EVENT SET _EVENT = %d", vl - 1);
                         }
                         runQuery(query, false);
+
                     }
                     else {
                         System.out.println(DataStorage.ANSI_RED + "Not allowed to create this Event" + DataStorage.ANSI_RESET);
@@ -491,7 +499,10 @@ abstract class abstractUser {
                     cumulativeTotalGP += totalGP;
                     SGPA = (totalGP / registeredCredits);
                 }
-                CGPA = (cumulativeTotalGP / cumulativeEarnedCredits);
+                if(cumulativeEarnedCredits == 0)
+                    CGPA = 0;
+                else
+                    CGPA = (cumulativeTotalGP / cumulativeEarnedCredits);
 
                 ArrayList<String> footerOptions = new ArrayList<>();
                 ArrayList<String> footerData = new ArrayList<>();
