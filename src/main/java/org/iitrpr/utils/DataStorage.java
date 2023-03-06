@@ -25,6 +25,9 @@ public class DataStorage {
     public static final int _SEMESTER_END = 7;
     public static final int _RUNNING = 0;
     public static final int _COMPLETED = 1;
+    public static final int _STUDENT = 0;
+    public static final int _FACULTY = 1;
+    public static final int _OFFICE = 2;
     public DataStorage() {
         GradePointMap.put("A", 10);
         GradePointMap.put("A-", 9);

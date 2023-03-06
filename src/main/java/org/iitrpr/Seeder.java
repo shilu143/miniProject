@@ -74,11 +74,23 @@ public class Seeder {
                         if(role.equalsIgnoreCase("student")) {
                             query = String.format("CREATE TABLE %s (" +
                                     "courseId varchar," +
-                                    //to be removed
-                                    "courseName varchar," +
-                                    "LTP integer[3]," +
-//                                    to be removed
+//                                    todo
+                                    "coursename varchar," +
+                                    "ltp integer[3]," +
+                                    "prereq varchar[]," +
+//                                    todo
                                     "grade varchar," +
+                                    "fid varchar," +
+                                    "session integer[2]" +
+                                    ")", "_" + id);
+                            Statement pstmt = connection.createStatement();
+                            pstmt.execute(query);
+                            pstmt.close();
+                        }
+                        else if(role.equalsIgnoreCase("faculty")) {
+                            query = String.format("CREATE TABLE %s (" +
+                                    "courseId varchar," +
+                                    "sid varchar," +
                                     "session integer[2]," +
                                     "PRIMARY KEY(courseId)" +
                                     ")", "_" + id);
@@ -105,20 +117,20 @@ public class Seeder {
                         st.executeUpdate();
                         st.close();
                         if(!deptId.equalsIgnoreCase("acad")) {
-                            Statement stmt = connection.createStatement();
-                            String query = String.format("CREATE TABLE _%s_ ( " +
-                                    "courseid varchar, " +
-                                    "coursename varchar, " +
-                                    "prereq varchar[], " +
-                                    "cgcriteria numeric(4, 2), " +
-                                    "type varchar, " +
-                                    "fid varchar, " +
-                                    "primary key(courseid) " +
-                                    ");", deptId);
-                            stmt.execute(query);
+//                            Statement stmt = connection.createStatement();
+//                            String query = String.format("CREATE TABLE _%s_ ( " +
+//                                    "courseid varchar, " +
+//                                    "coursename varchar, " +
+//                                    "prereq varchar[], " +
+//                                    "cgcriteria numeric(4, 2), " +
+//                                    "type varchar, " +
+//                                    "fid varchar, " +
+//                                    "primary key(courseid) " +
+//                                    ");", deptId);
+//                            stmt.execute(query);
 
-                            stmt = connection.createStatement();
-                            query = String.format("CREATE TABLE COURSE_CATALOG_%s ( " +
+                            Statement stmt = connection.createStatement();
+                            String query = String.format("CREATE TABLE COURSE_CATALOG_%s ( " +
                                     "courseid varchar, " +
                                     "coursename varchar, " +
                                     "ltp integer[3], " +

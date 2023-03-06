@@ -16,6 +16,11 @@ public class AcademicOffice extends abstractUser{
     }
 
     @Override
+    protected void floatCourse(String deptid) {
+//return null;
+    }
+
+    @Override
     public void showMenu() {
         do {
             clearScreen();
@@ -39,7 +44,7 @@ public class AcademicOffice extends abstractUser{
                 System.out.print("> ");
                 String inp = sc.nextLine();
                 switch (inp) {
-                    case "1" -> showPersonalDetails();
+                    case "1" -> showPersonalDetails(DataStorage._OFFICE);
                     case "2" -> viewCourseCatalog();
                     case "3" -> showCourseOffering();
                     case "4" -> viewStudentRecord();
@@ -52,6 +57,131 @@ public class AcademicOffice extends abstractUser{
         } while(!isLoggedout);
     }
 
+
+    void showCourseOffering() {
+        clearScreen();
+        CLI cli = new CLI();
+        ArrayList<String> options = new ArrayList<>();
+        ArrayList<ArrayList<String>> dept = getAllDept();
+        for(var d : dept) {
+            options.add(d.get(1));
+        }
+        options.add("Back");
+        cli.createVSubmenu("Choose Department", null, options);
+        Scanner sc = new Scanner(System.in);
+        boolean runner;
+        do {
+            runner = false;
+            System.out.print("> ");
+            String inp = sc.nextLine().trim();
+            try {
+                int vl = Integer.parseInt(inp);
+                if(vl >= 1 && vl <= dept.size()) showDeptOffering(dept.get(vl - 1).get(0));
+                else if(vl == dept.size() + 1) {
+//                    return to previous method
+                }
+                else {
+                    runner = true;
+                }
+            } catch (NumberFormatException e) {
+                runner = true;
+            }
+        } while(runner);
+    }
+
+    private void showDeptOffering(String deptId) {
+        boolean validInput = false;
+        int year = 0;
+        while(!validInput) {
+            System.out.print("Enter year (1, 2, 3, 4) = ");
+            Scanner sc = new Scanner(System.in);
+            String inp = sc.next();
+            try{
+                year = Integer.parseInt(inp);
+                if(year < 1 || year > 4) {
+                    System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                }
+                else {
+                    validInput = true;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+            }
+        }
+
+        clearScreen();
+        fetchEvent();
+        String tabName = String.format("y%d_%s_offering", year, deptId);
+        String query = String.format("""
+            SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
+                FROM (
+                    SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
+                    FROM %s t1
+                    INNER JOIN course_catalog_%s t2
+                    ON t2.courseid = t1.courseid
+                ) table1
+            INNER JOIN (
+                SELECT courseid, MAX(batch) as max_value
+                FROM course_catalog_cse table2
+                WHERE batch <= %d
+                GROUP BY courseid
+            ) subquery
+            ON table1.courseid = subquery.courseid
+            AND table1.batch = subquery.max_value
+            INNER JOIN faculty t3 on table1.fid = t3.id
+            WHERE lower(table1.type) <> lower('e');
+        """, tabName, deptId, _CURR_SESSION[0] - year + 1);
+        ArrayList<ArrayList<String>> data = fetchTable(query);
+        ArrayList<String> options  = new ArrayList<>();
+        options.add("Course ID");
+        options.add("Course Name");
+        options.add("LTP");
+        options.add("Prerequisites");
+        options.add("Type");
+        options.add("CG Criteria");
+        options.add("Instructor");
+        CLI cli = new CLI();
+        cli.recordPrint("Core Courses", options, data, null, null);
+        query = String.format("""
+            SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
+                FROM (
+                    SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
+                    FROM %s t1
+                    INNER JOIN course_catalog_%s t2
+                    ON t2.courseid = t1.courseid
+                ) table1
+            INNER JOIN (
+                SELECT courseid, MAX(batch) as max_value
+                FROM course_catalog_cse table2
+                WHERE batch <= %d
+                GROUP BY courseid
+            ) subquery
+            ON table1.courseid = subquery.courseid
+            AND table1.batch = subquery.max_value
+            INNER JOIN faculty t3 on table1.fid = t3.id
+            WHERE lower(table1.type) = lower('e');
+        """, tabName, deptId, _CURR_SESSION[0] - year + 1);
+        data = fetchTable(query);
+        cli.recordPrint("Elective Courses", options, data, null, null);
+        options = new ArrayList<>();
+        options.add("Back");
+        cli.createVSubmenu("Sub Menu", null, options);
+        boolean runner;
+        do {
+            runner = false;
+            Scanner sc = new Scanner(System.in);
+            System.out.print("> ");
+            String inp = sc.next();
+            switch (inp) {
+                case "1" -> {
+//                    return back
+                }
+                default -> {
+                    runner = true;
+                }
+            }
+        } while(runner);
+    }
     private void graduationCheck() {
         String sId = null;
         Scanner sc = new Scanner(System.in);
@@ -152,455 +282,15 @@ public class AcademicOffice extends abstractUser{
     }
 
 
-    private void currentEvent() {
-        boolean outer;
-        do {
-            outer = false;
-            clearScreen();
-            fetchEvent();
-            CLI cli = new CLI();
-            ArrayList<String> options = new ArrayList<>();
-            ArrayList<String> data = new ArrayList<>();
-            options.add("Academic Session");
-            options.add("Current Event");
-            data.add(String.format("%d - %d", _CURR_SESSION[0], _CURR_SESSION[1]));
-            data.add(String.format("%s", dataStorage.EventHash.get(_EVENT)));
-            cli.createVerticalTable("EVENT", options, data);
-
-            options = new ArrayList<>();
-            options.add("Create New Event");
-            options.add("Back");
-            cli.createVSubmenu("SubMenu", null, options);
-            Scanner sc = new Scanner(System.in);
-            boolean runner;
-            do {
-                runner = false;
-                System.out.print("> ");
-                String inp = sc.nextLine();
-                switch (inp) {
-                    case "1" -> {
-                        createNewEvent();
-                        outer = true;
-                    }
-                    case "2" -> {
-//                    back
-                    }
-                    default -> runner = true;
-                }
-            } while (runner);
-        } while(outer);
-    }
-
-    private void createNewEvent() {
-        clearScreen();
-        CLI cli = new CLI();
-        ArrayList<String> options = new ArrayList<>();
-        options.add("Start new Semester");
-        options.add("Start Course Float Event");
-        options.add("End Course Float Event");
-        options.add("Start Course Registration Event");
-        options.add("End Course Registration Event");
-        options.add("Start Grade Submission Event");
-        options.add("End Grade Submission Event");
-        options.add("End the Semester");
-        options.add("Back");
-        cli.createVSubmenu("SubMenu", null, options);
-        Scanner sc = new Scanner(System.in);
-        boolean runner;
-        do {
-            runner = false;
-            System.out.print("> ");
-            String inp = sc.nextLine().trim();
-            try {
-                int vl = Integer.parseInt(inp);
-                if(vl >= 1 &&  vl <= 8) {
-                    int temp = vl - 2;
-                    temp = (temp < 0 ? DataStorage._SEMESTER_END : temp);
-                    if(_EVENT == temp) {
-                        String query;
-                        if(vl - 1 == DataStorage._SEMESTER_START) {
-                            if(_CURR_SESSION[1] == 2) {
-                                _CURR_SESSION[0]++;
-                                _CURR_SESSION[1] = 1;
-                            }
-                            else {
-                                _CURR_SESSION[1] = 2;
-                            }
-                            query = String.format("UPDATE EVENT SET _EVENT = 0, " +
-                                    "_SESSION = ARRAY[%d, %d]", _CURR_SESSION[0], _CURR_SESSION[1]);
-                        }
-                        else {
-                            query = String.format("UPDATE EVENT SET _EVENT = %d", vl - 1);
-                        }
-                        runQuery(query, false);
-                    }
-                    else {
-                        System.out.println(DataStorage.ANSI_RED + "Not allowed to create this Event" + DataStorage.ANSI_RESET);
-                        runner = true;
-                    }
-                }
-                else if (vl == 9) {
-//                    BACK
-                }
-                else {
-                    runner = true;
-                }
-            }
-            catch (NumberFormatException exception){
-                runner = true;
-            }
-        } while(runner);
-    }
-
-    private void viewStudentRecord() {
-        String sId = null;
-        Scanner sc = new Scanner(System.in);
-        boolean isValid = false;
-        while(!isValid) {
-            System.out.print("Enter the Student ID = ");
-            sId = sc.next();
-            String query = String.format("select * from student where lower(id) = lower('%s')", sId);
-            if(runQuery(query, true)) {
-                isValid = true;
-            }
-            else {
-                System.out.println(DataStorage.ANSI_RED + "There is no student with that id" + DataStorage.ANSI_RESET);
-            }
-        }
-
-        ResultSet studentData = getResultSet(String.format("select * from student  inner join department on department.deptid = student.deptid where lower(student.id) = lower('%s')", sId));
-        StringBuilder TRANSCRIPT = new StringBuilder();
-
-        try {
-            TRANSCRIPT.append("\nName : ");
-            TRANSCRIPT.append(studentData.getString("name").toUpperCase());
-            TRANSCRIPT.append("\nID : ");
-            TRANSCRIPT.append(studentData.getString("id").toUpperCase());
-            TRANSCRIPT.append("\nDepartment : ");
-            TRANSCRIPT.append(studentData.getString("deptname"));
-            TRANSCRIPT.append("\nEmail : ");
-            TRANSCRIPT.append(studentData.getString("email"));
-            TRANSCRIPT.append("\nContact : ");
-            TRANSCRIPT.append(studentData.getString("contact"));
-            TRANSCRIPT.append("\n\n");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-//        boolean outer;
-//        do {
-//            outer = false;
-            clearScreen();
-            CLI cli = new CLI();
-            String query = String.format("SELECT DISTINCT session FROM _%s ORDER BY session ASC", sId);
-            float cumulativeEarnedCreated = 0;
-            int totalSemester = 0;
-            float cumulativeTotalGP = 0;
-            try {
-                //Event fetching
-                fetchEvent();
-
-                Statement stmt = connection.createStatement();
-                ResultSet rs = stmt.executeQuery(query);
-                while (rs.next()) {
-                    int status = DataStorage._COMPLETED;
-                    Array rsString = rs.getArray("session");
-                    ArrayList<String> options = new ArrayList<>();
-                    options.add("Course ID");
-                    options.add("Course Name");
-                    options.add("(L-T-P-C)");
-                    options.add("Status");
-                    options.add("Grade");
-
-                    ArrayList<ArrayList<String>> data = new ArrayList<>();
-                    Integer[] session = null;
-                    if (rsString != null) {
-                        session = (Integer[]) rsString.getArray();
-                    }
-                    assert session != null;
-
-                    if (Arrays.equals(_CURR_SESSION, session) && _EVENT < DataStorage._GRADE_SUBMISSION_END) {
-                        status = DataStorage._RUNNING;
-                    }
-
-                    query = String.format("SELECT * FROM _%s " +
-                            "WHERE session = ARRAY[%d, %d]", sId, session[0], session[1]);
-
-                    String header = String.format("Academic Session: %d-%d", session[0], session[1]);
-                    stmt = connection.createStatement();
-                    ResultSet rs2 = stmt.executeQuery(query);
-                    float earnedCredits = 0;
-                    float registeredCredits = 0;
-                    float SGPA = 0;
-                    float CGPA = 0;
-                    float totalGP = 0;
-                    while (rs2.next()) {
-                        String courseId = rs2.getString("courseid")
-                                .trim().
-                                toUpperCase();
-                        String courseName = rs2.getString("coursename").trim();
-                        Integer[] ltp = null;
-                        String ltpc = null;
-                        String grade = rs2.getString("grade");
 
 
-                        ArrayList<String> temp = new ArrayList<>();
-                        rsString = rs2.getArray("ltp");
-                        if (rsString != null) {
-                            ltp = (Integer[]) rsString.getArray();
-                        }
-                        assert ltp != null;
-                        int credits = ltp[0] + ltp[2] / 2;
-                        ltpc = String.format("(%d-%d-%d-%d)", ltp[0], ltp[1], ltp[2], credits);
 
 
-                        registeredCredits += credits;
-                        if (status == DataStorage._COMPLETED) {
-                            int gp = dataStorage.GradePointMap.get(grade);
-                            if (gp != 0) {
-                                earnedCredits += credits;
-                                cumulativeEarnedCreated += credits;
-                            }
-                            totalGP += (credits * gp);
-                        }
-
-                        temp.add(courseId);
-                        temp.add(courseName);
-                        temp.add(ltpc);
-                        temp.add(status == DataStorage._COMPLETED ? "Completed" : "Running");
-                        temp.add(status == DataStorage._COMPLETED ? grade : "N/A");
-                        data.add(temp);
-                    }
-                    if (status == DataStorage._COMPLETED) {
-                        totalSemester++;
-                        cumulativeTotalGP += totalGP;
-                        SGPA = (totalGP / registeredCredits);
-                    }
-                    CGPA = (cumulativeTotalGP / cumulativeEarnedCreated);
-
-                    ArrayList<String> footerOptions = new ArrayList<>();
-                    ArrayList<String> footerData = new ArrayList<>();
-                    footerOptions.add("Registered Credits");
-                    footerData.add(String.valueOf(registeredCredits));
-                    footerOptions.add("Earned Credits");
-                    footerData.add(String.valueOf((status == DataStorage._COMPLETED) ? earnedCredits : "N/A"));
-                    footerOptions.add("SGPA");
-                    footerData.add(String.valueOf((status == DataStorage._COMPLETED) ? SGPA : "N/A"));
-                    footerOptions.add("CGPA");
-                    footerData.add(String.valueOf(CGPA));
-                    TRANSCRIPT.append(cli.specialPrint(header, options, data, footerOptions, footerData)).append("\n\n");
-                }
-                stmt.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-
-            ArrayList<String> options = new ArrayList<>();
-            options.add("Generate Transcript");
-            options.add("Back");
-            cli.createVSubmenu("SubMenu", null, options);
-            boolean runner;
-            do {
-                runner = false;
-                System.out.print("> ");
-                String input = sc.next();
-                switch (input) {
-                    case "1" -> {
-//                    generate transcript
-                        TestingStuffs.generateTranscript(sId, TRANSCRIPT.toString());
-                        System.out.println(DataStorage.ANSI_GREEN + "Transcript Generated successfully in the documents folder" + DataStorage.ANSI_RESET);
-                        runner = true;
-                    }
-                    case "2" -> {
-//                    return back
-                    }
-
-                    default -> {
-                        runner = true;
-                    }
-                }
-            } while(runner);
-//        } while(outer);
-    }
-
-    private void showCourseOffering() {
-        clearScreen();
-        CLI cli = new CLI();
-        ArrayList<String> options = new ArrayList<>();
-        ArrayList<ArrayList<String>> dept = getAllDept();
-        for(var d : dept) {
-            options.add(d.get(1));
-        }
-        options.add("Back");
-        cli.createVSubmenu("Choose Department", null, options);
-        Scanner sc = new Scanner(System.in);
-        boolean runner;
-        do {
-            runner = false;
-            System.out.print("> ");
-            String inp = sc.nextLine().trim();
-            try {
-                int vl = Integer.parseInt(inp);
-                if(vl >= 1 && vl <= dept.size()) showDeptOffering(dept.get(vl - 1).get(0));
-                else if(vl == dept.size() + 1) {
-//                    return to previous method
-                }
-                else {
-                    runner = true;
-                }
-            } catch (NumberFormatException e) {
-                runner = true;
-            }
-        } while(runner);
-    }
-
-    private void showDeptOffering(String deptId) {
-        boolean validInput = false;
-        int year = 0;
-        while(!validInput) {
-            System.out.print("Enter year (1, 2, 3, 4) = ");
-            Scanner sc = new Scanner(System.in);
-            String inp = sc.next();
-            try{
-                year = Integer.parseInt(inp);
-                if(year < 1 || year > 4) {
-                    System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
-                }
-                else {
-                    validInput = true;
-                }
-            } catch (NumberFormatException e) {
-                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
-            }
-        }
-
-        clearScreen();
-
-        String tabName = String.format("y%d_%s_offering", year, deptId);
-        String query = String.format("select t1.courseid , t2.coursename, t2.ltp, t2.prereq, t2.type, t1.cgcriteria, t3.name as Instructor\n" +
-                "from %s t1\n" +
-                "inner join course_catalog_%s t2 on t1.courseid = t2.courseid\n" +
-                "inner join faculty t3 on t1.fid=t3.id\n" +
-                "where lower(t2.type) <> lower('e')", tabName, deptId);
-        ArrayList<ArrayList<String>> data = fetchTable(query);
-        ArrayList<String> options  = new ArrayList<>();
-        options.add("Course ID");
-        options.add("Course Name");
-        options.add("LTP");
-        options.add("Prerequisites");
-        options.add("Type");
-        options.add("CG Criteria");
-        options.add("Instructor");
-        CLI cli = new CLI();
-        cli.recordPrint("Core Courses", options, data, null, null);
-        query = String.format("select t1.courseid , t2.coursename, t2.ltp, t2.prereq, t2.type, t1.cgcriteria, t3.name as Instructor\n" +
-                "from %s t1\n" +
-                "inner join course_catalog_%s t2 on t1.courseid = t2.courseid\n" +
-                "inner join faculty t3 on t1.fid=t3.id\n" +
-                "where lower(t2.type) = lower('e')", tabName, deptId);
-        data = fetchTable(query);
-        cli.recordPrint("Elective Courses", options, data, null, null);
-        options = new ArrayList<>();
-        options.add("Back");
-        cli.createVSubmenu("Sub Menu", null, options);
-        boolean runner;
-        do {
-            runner = false;
-            Scanner sc = new Scanner(System.in);
-            System.out.print("> ");
-            String inp = sc.next();
-            switch (inp) {
-                case "1" -> {
-//                    return back
-                }
-                default -> {
-                    runner = true;
-                }
-            }
-        } while(runner);
-    }
-
-    private void viewCourseCatalog() {
-        clearScreen();
-        CLI cli = new CLI();
-        ArrayList<String> options = new ArrayList<>();
-        ArrayList<ArrayList<String>> dept = getAllDept();
-        for(var d : dept) {
-            options.add(d.get(1));
-        }
-        options.add("Back");
-        cli.createVSubmenu("Choose Department", null, options);
-        Scanner sc = new Scanner(System.in);
-        boolean runner;
-        do {
-            runner = false;
-            System.out.print("> ");
-            String inp = sc.nextLine().trim();
-            try {
-                int vl = Integer.parseInt(inp);
-                if(vl >= 1 && vl <= dept.size()) showDeptCourse(dept.get(vl - 1).get(0));
-                else if(vl == dept.size() + 1) {
-//                    return to previous method
-                }
-                else {
-                    runner = true;
-                }
-            } catch (NumberFormatException e) {
-                runner = true;
-            }
-        } while(runner);
-    }
-
-    private void showDeptCourse(String deptid) {
-        clearScreen();
-        boolean outer;
-        do {
-            outer = false;
-            CLI cli = new CLI();
-            String query = String.format("SELECT * FROM course_catalog_%s", deptid);
-            ArrayList<ArrayList<String>> data = fetchTable(query);
-            ArrayList<String> options = new ArrayList<>();
-            options.add("Course ID");
-            options.add("Course Name");
-            options.add("LTP");
-            options.add("Prerequisites");
-            options.add("Type");
-            options.add("Batch Onwards");
-            cli.recordPrint(deptid.toUpperCase() + " Courses",options, data, null, null);
-            options = new ArrayList<>();
-            options.add("Add New Course");
-            options.add("Edit Course");
-            options.add("Back");
-            cli.createVSubmenu("Menu", null, options);
-
-            Scanner sc = new Scanner(System.in);
-            boolean runner;
-            do {
-                runner = false;
-                System.out.print("> ");
-                String inp = sc.nextLine().trim();
-                switch (inp) {
-                    case "1" -> {
-                        addNewCourseinCatalog(deptid);
-                        outer = true;
-                    }
-                    case "2" -> {
-                        editCourseCatalog(deptid);
-                        outer = true;
-                    }
-
-                    case "3" -> {
-    //                    return back
-                    }
-                    default -> runner = true;
-                }
-            } while(runner);
-        }   while(outer);
-    }
-
-    private void addNewCourseinCatalog(String deptId) {
+    @Override
+    public void addNewCourseinCatalog(String deptId) {
         fetchEvent();
         if(_EVENT > DataStorage._SEMESTER_START && _EVENT < DataStorage._SEMESTER_END) {
-            System.out.println("Sorry you can't edit the course Catalog");
+            System.out.println("Sorry currently you can't edit the course Catalog");
             return;
         }
         Scanner sc = new Scanner(System.in);
@@ -699,7 +389,6 @@ public class AcademicOffice extends abstractUser{
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public static boolean isIntegerArray(String input) {
@@ -714,8 +403,8 @@ public class AcademicOffice extends abstractUser{
         }
         return values.length == 3;
     }
-
-    private void editCourseCatalog(String deptId) {
+    @Override
+    public void editCourseCatalog(String deptId) {
         fetchEvent();
         if(_EVENT > DataStorage._SEMESTER_START && _EVENT < DataStorage._SEMESTER_END) {
             System.out.println("Sorry you can't edit the course Catalog");
@@ -790,7 +479,6 @@ public class AcademicOffice extends abstractUser{
                 System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
             }
         }
-
 
         validInput = false;
         while(!validInput) {
@@ -888,70 +576,5 @@ public class AcademicOffice extends abstractUser{
             }
         }
         return true;
-    }
-    
-
-    @Override
-    void showPersonalDetails() {
-        boolean outer;
-        do {
-            outer = false;
-            clearScreen();
-            CLI cli = new CLI();
-
-            ArrayList<String> Options = new ArrayList<>();
-            Options.add("name");
-            Options.add("id");
-            Options.add("role");
-            Options.add("department");
-            Options.add("email");
-            Options.add("contact no.");
-            ArrayList<String> data = fetchData();
-            cli.createVerticalTable("Personal Details", Options, data);
-
-            ArrayList<String> options = new ArrayList<>();
-            options.add("Back");
-            options.add("Edit");
-
-
-            cli.createVSubmenu("SubMenu", null, options);
-
-            Scanner sc = new Scanner(System.in);
-            boolean inner;
-            do {
-                inner = false;
-                System.out.print("> ");
-                String inp = sc.nextLine();
-                switch (inp) {
-                    case "1" -> {
-                        //returns to previous method
-                    }
-                    case "2" -> {
-                        editPersonalDetails();
-                        outer = true;
-                    }
-                    default -> inner = true;
-                }
-            } while (inner);
-        }   while(outer);
-    }
-
-    @Override
-    void editPersonalDetails() {
-        System.out.print("Enter your new Contact number = ");
-        Scanner sc = new Scanner(System.in);
-        String newContact = sc.nextLine();
-        String query = String.format(
-                "UPDATE %s " +
-                "SET contact = '%s' " +
-                "WHERE " +
-                "id = '%s'", role, newContact, id);
-        try {
-            Statement stmt = connection.createStatement();
-            stmt.execute(query);
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

@@ -13,6 +13,21 @@ public class Student extends abstractUser {
     }
 
     @Override
+    protected void floatCourse(String deptid) {
+//return null;
+    }
+
+    @Override
+    protected void editCourseCatalog(String deptid) {
+//        return null
+    }
+
+    @Override
+    protected void addNewCourseinCatalog(String deptid) {
+//        return null
+    }
+
+    @Override
     public void showMenu() {
         do {
             clearScreen();
@@ -35,7 +50,7 @@ public class Student extends abstractUser {
                 System.out.print("> ");
                 String inp = sc.nextLine();
                 switch (inp) {
-                    case "1" -> showPersonalDetails();
+                    case "1" -> showPersonalDetails(DataStorage._STUDENT);
                     case "2" -> studentRecord();
                     case "3" -> showCourseOffering();
                     case "4" -> showCurrentEvent();
@@ -47,6 +62,235 @@ public class Student extends abstractUser {
         } while(!isLoggedout);
     }
 
+    void showCourseOffering() {
+        fetchEvent();
+        Integer year = _CURR_SESSION[0] - Integer.parseInt(id.substring(0,4)) + 1;
+        String query = String.format("SELECT deptid from student where id = lower('%s')", id);
+        ArrayList<ArrayList<String>> data = fetchTable(query);
+        String deptId  = data.get(0).get(0);
+//        System.out.println(year);
+        showDeptOffering(deptId, year);
+    }
+
+    private float getCourseCredit(String courseId, Integer year, String deptId, String batch) {
+        String query = String.format("""
+                SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor
+                    FROM (
+                        SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
+                        FROM y%d_%s_offering t1
+                        INNER JOIN course_catalog_%s t2
+                        ON t2.courseid = t1.courseid
+                    ) table1
+                INNER JOIN (
+                    SELECT courseid, MAX(batch) as max_value
+                    FROM course_catalog_%s table2
+                    WHERE batch <= %s
+                    GROUP BY courseid
+                ) subquery
+                ON table1.courseid = subquery.courseid
+                AND table1.batch = subquery.max_value
+                INNER JOIN faculty t3 on table1.fid = t3.id
+                WHERE table1.courseid = lower('%s');
+                """, year, deptId, deptId, deptId, batch, courseId);
+//        System.out.println(query);
+        float credit = 0.0f;
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                Array temp = rs.getArray("ltp");
+                Integer[] ltp = (Integer[])temp.getArray();
+                credit = ltp[0] + ltp[2] / 2.0f;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return credit;
+    }
+
+    private void showDeptOffering(String deptId, Integer year) {
+        clearScreen();
+        fetchEvent();
+        String tabName = String.format("y%d_%s_offering", year, deptId);
+        String query = String.format("""
+            SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
+                FROM (
+                    SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
+                    FROM %s t1
+                    INNER JOIN course_catalog_%s t2
+                    ON t2.courseid = t1.courseid
+                ) table1
+            INNER JOIN (
+                SELECT courseid, MAX(batch) as max_value
+                FROM course_catalog_%s table2
+                WHERE batch <= %d
+                GROUP BY courseid
+            ) subquery
+            ON table1.courseid = subquery.courseid
+            AND table1.batch = subquery.max_value
+            INNER JOIN faculty t3 on table1.fid = t3.id
+            WHERE lower(table1.type) <> lower('e');
+        """, tabName, deptId, deptId, _CURR_SESSION[0] - year + 1);
+//        System.out.println(query);
+        ArrayList<ArrayList<String>> data = fetchTable(query);
+        ArrayList<String> options  = new ArrayList<>();
+        options.add("Course ID");
+        options.add("Course Name");
+        options.add("LTP");
+        options.add("Prerequisites");
+        options.add("Type");
+        options.add("CG Criteria");
+        options.add("Instructor");
+        CLI cli = new CLI();
+        cli.recordPrint("Core Courses", options, data, null, null);
+        query = String.format("""
+            SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
+                FROM (
+                    SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
+                    FROM %s t1
+                    INNER JOIN course_catalog_%s t2
+                    ON t2.courseid = t1.courseid
+                ) table1
+            INNER JOIN (
+                SELECT courseid, MAX(batch) as max_value
+                FROM course_catalog_%s table2
+                WHERE batch <= %d
+                GROUP BY courseid
+            ) subquery
+            ON table1.courseid = subquery.courseid
+            AND table1.batch = subquery.max_value
+            INNER JOIN faculty t3 on table1.fid = t3.id
+            WHERE lower(table1.type) = lower('e');
+        """, tabName, deptId, deptId, _CURR_SESSION[0] - year + 1);
+        data = fetchTable(query);
+        cli.recordPrint("Elective Courses", options, data, null, null);
+        options = new ArrayList<>();
+        options.add("Enroll Course");
+        options.add("Back");
+        cli.createVSubmenu("Sub Menu", null, options);
+        boolean runner;
+        do {
+            runner = false;
+            Scanner sc = new Scanner(System.in);
+            System.out.print("> ");
+            String inp = sc.next();
+            switch (inp) {
+                case "1" -> {
+                    enrollCourse(year, deptId);
+                    runner = true;
+                }
+                case "2" -> {
+//                    return back
+                }
+                default -> {
+                    runner = true;
+                }
+            }
+        } while(runner);
+    }
+
+    private void enrollCourse(Integer year, String deptId) {
+        fetchEvent();
+        if(_EVENT != DataStorage._COURSE_REG_START) {
+            System.out.println(DataStorage.ANSI_RED + "Sorry currently course Registration is not allowed" + DataStorage.ANSI_RESET);
+            return;
+        }
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter courseId = ");
+        String courseId = sc.nextLine();
+        String query = String.format("SELECT * FROM y%d_%s_offering where courseid = lower('%s')", year, deptId, courseId);
+        ArrayList<ArrayList<String>> data = fetchTable(query);
+        if(data.size() == 0) {
+            System.out.println(DataStorage.ANSI_RED + "There is no such course exist in the course offering" + DataStorage.ANSI_RESET);
+            return;
+        }
+        query = String.format("""
+            SELECT * FROM _%s
+            WHERE lower(courseid) = lower('%s')
+                and grade is not null and lower(grade) <> 'f'
+                """, id, courseId);
+//        System.out.println(query);
+        if(runQuery(query, true)) {
+            System.out.println(DataStorage.ANSI_RED + "You have already done this course previously" + DataStorage.ANSI_RESET);
+            return;
+        }
+//        System.out.println(data);
+        Float credit = getCourseCredit(courseId, year, deptId, id.substring(0,4));
+//        System.out.println(credit);
+        query = String.format("""
+                SELECT COALESCE(SUM(ltp[1] + ltp[3] / 2.0), 0.0) as credit
+                    FROM (
+                        SELECT t1.courseid, t2.batch, t2.ltp, t1.session
+                        FROM _%s t1
+                        INNER JOIN course_catalog_%s t2
+                        ON t2.courseid = t1.courseid
+                    ) table1
+                INNER JOIN (
+                    SELECT courseid, MAX(batch) as max_value
+                    FROM course_catalog_%s table2
+                    WHERE batch <= %s
+                    GROUP BY courseid
+                ) subquery
+                ON table1.courseid = subquery.courseid
+                AND table1.batch = subquery.max_value
+                WHERE table1.session = array[%d,%d]
+                """, id, deptId, deptId, id.substring(0, 4), _CURR_SESSION[0], _CURR_SESSION[1]);
+        Float curRegisteredCredits = Float.parseFloat(fetchTable(query).get(0).get(0));
+//        System.out.println(curRegisteredCredits);
+        Float creditLimit = fetchCreditLimit(deptId, year);
+        if(curRegisteredCredits + credit > creditLimit) {
+            System.out.println("Credit Limit exceeded");
+            return;
+        }
+        System.out.println("OK credit check ok");
+        query  = String.format("""
+                SELECT *
+                from course_catalog_%s t1
+                inner join (
+                SELECT courseid, MAX(batch) as max_value
+                FROM course_catalog_%s table2
+                WHERE batch <= 2020
+                    and courseid = 'cs201'
+                GROUP BY courseid) t2 on t1.courseid = t2.courseid and t1.batch = t2.max_value;
+                """, deptId, deptId);
+    }
+
+    private Float fetchCreditLimit(String deptId, Integer year) {
+        float creditLimit = 0.0f;
+        fetchEvent();
+        String query = "select sem1, sem2, mult from ug_req";
+        ArrayList<ArrayList<String>> data= fetchTable(query);
+        float mult = Float.parseFloat(data.get(0).get(2));
+        if(year == 1) {
+            if(_CURR_SESSION[1] == 1) {
+                return Float.parseFloat(data.get(0).get(0));
+            }
+            if(_CURR_SESSION[1] == 2) {
+                return Float.parseFloat(data.get(0).get(1));
+            }
+        }
+        else {
+            int temp = _CURR_SESSION[0] * 2 + _CURR_SESSION[1];
+            Integer[] prevSem1 = new Integer[2];
+            prevSem1[0] = (temp - 1) / 2;
+            prevSem1[1] = ((temp - 1) % 2 == 0 ? 2 : 1);
+            Integer[] prevSem2 = new Integer[2];
+            prevSem2[0] = (temp - 2) / 2;
+            prevSem2[1] = ((temp - 2) % 2 == 0 ? 2 : 1);
+            float creditSum = 0.0f;
+            query = String.format("""
+                SELECT COALESCE(SUM(ltp[1] + ltp[3]),0.0)
+                FROM _%s
+                where session = array[%d, %d] or session = array[%d, %d]
+                    and lower(grade) <> 'f'
+                """, id, prevSem1[0], prevSem1[1], prevSem2[0], prevSem2[1]);
+            data = fetchTable(query);
+            creditSum += Float.parseFloat(data.get(0).get(0));
+            creditLimit =  (float) ((creditSum / 2.0)* mult);
+        }
+        return creditLimit;
+    }
 
 
     private void isGraduated() {
@@ -80,32 +324,6 @@ public class Student extends abstractUser {
             throw new RuntimeException(e);
         }
         return data;
-    }
-
-    private void showCourseOffering() {
-        clearScreen();
-        ArrayList<String> options = new ArrayList<>();
-        options.add("Course ID");
-        options.add("Course Name");
-        options.add("Prerequisites");
-        options.add("CG Criteria");
-        options.add("Type");
-        options.add("Instructor");
-        ArrayList<ArrayList<String>> data;
-
-
-        CLI cli = new CLI();
-
-        String deptid = "cse"; //todo
-
-        String query = String.format("SELECT * FROM _%s_ where LOWER(type) <> LOWER('e')", deptid);
-        data = fetchOffering(query);
-        cli.recordPrint("Core Courses",options, data, null, null);
-        query = String.format("SELECT * FROM _%s_ where LOWER(type) = LOWER('e')", deptid);
-        data = fetchOffering(query);
-        cli.recordPrint("Elective Courses",options, data, null, null);
-        Scanner sc = new Scanner(System.in);
-        sc.nextLine();
     }
 
     private void studentRecord() {
@@ -297,112 +515,5 @@ public class Student extends abstractUser {
             System.out.println("Sorry, Course Register/Drop Event has not yet Started");
         }
         return false;
-    }
-
-    @Override
-    void showPersonalDetails() {
-        boolean outer;
-        do {
-            outer = false;
-            clearScreen();
-            CLI cli = new CLI();
-
-            ArrayList<String> options = new ArrayList<>();
-            options.add("name");
-            options.add("id");
-            options.add("role");
-            options.add("batch");
-            options.add("department");
-            options.add("email");
-            options.add("contact no.");
-            ArrayList<String> data = fetchData();
-            data.add(3, id.substring(0,4));
-            cli.createVerticalTable("Personal Details", options, data);
-
-            options = new ArrayList<>();
-            options.add("Back");
-            options.add("Edit");
-
-
-            cli.createVSubmenu("SubMenu", null, options);
-            Scanner sc = new Scanner(System.in);
-            boolean inner;
-            do {
-                inner = false;
-                System.out.print("> ");
-                String inp = sc.nextLine();
-                switch (inp) {
-                    case "1" -> {
-                        //returns to previous method
-                    }
-                    case "2" -> {
-                        editPersonalDetails();
-                        outer = true;
-                    }
-                    default -> inner = true;
-                }
-            } while (inner);
-        }   while(outer);
-    }
-
-    @Override
-    void editPersonalDetails() {
-        boolean outer;
-        do {
-            outer = false;
-            clearScreen();
-            CLI cli = new CLI();
-
-            ArrayList<String> options = new ArrayList<>();
-            options.add("name");
-            options.add("id");
-            options.add("role");
-            options.add("batch");
-            options.add("department");
-            options.add("email");
-            options.add("contact no.");
-            ArrayList<String> data = fetchData();
-            data.add(3, id.substring(0,4));
-            cli.createVerticalTable("Personal Details", options, data);
-
-            options = new ArrayList<>();
-            options.add("Back");
-            options.add("Edit");
-
-
-            cli.createVSubmenu("SubMenu", null, options);
-            Scanner sc = new Scanner(System.in);
-            boolean inner;
-            do {
-                inner = false;
-                System.out.print("> ");
-                String inp = sc.nextLine();
-                switch (inp) {
-                    case "1" -> {
-                        //returns to previous method
-                    }
-                    case "2" -> {
-                        editPersonalDetails();
-                        outer = true;
-                    }
-                    default -> inner = true;
-                }
-            } while (inner);
-        }   while(outer);
-        System.out.print("Enter your new Contact number = ");
-        Scanner sc = new Scanner(System.in);
-        String newContact = sc.nextLine();
-        String query = String.format(
-                "UPDATE %s " +
-                        "SET contact = '%s' " +
-                        "WHERE " +
-                        "id = '%s'", role, newContact, id);
-        try {
-            Statement stmt = connection.createStatement();
-            stmt.execute(query);
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
