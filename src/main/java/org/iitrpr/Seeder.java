@@ -90,6 +90,7 @@ public class Seeder {
                         else if(role.equalsIgnoreCase("faculty")) {
                             query = String.format("CREATE TABLE %s (" +
                                     "courseId varchar," +
+                                    "coursename varchar," +
                                     "sid varchar," +
                                     "session integer[2]" +
                                     ")", "_" + id);

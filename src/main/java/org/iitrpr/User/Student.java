@@ -285,7 +285,7 @@ public class Student extends abstractUser {
                                 WHERE lower(courseid) = lower('%s')
                                     and grade is not null and lower(grade) <> 'f'
                                     """, id, crs);
-                        if (runQuery(query, true)) {
+                        if (!runQuery(query, true)) {
                             System.out.println(DataStorage.ANSI_RED + "You do not satisfied the prerequisite for this course" + DataStorage.ANSI_RESET);
                             return;
                         }
@@ -305,7 +305,7 @@ public class Student extends abstractUser {
         }
         studentRecord(true);
         if(_CGPA < cgCriteria) {
-            System.out.println("Not satisfying cgcriteria");
+            System.out.println(DataStorage.ANSI_RED + "CG Criteria is not satisfied" + DataStorage.ANSI_RESET);
             return;
         }
 //        System.out.println("Done prerequisites");
@@ -339,13 +339,15 @@ public class Student extends abstractUser {
                 Array temp = connection.createArrayOf("INT", _CURR_SESSION);
                 pstmt.setArray(6, temp);
                 pstmt.execute();
-                query = String.format("insert into _%s values('%s', '%s', array[%d, %d])",
+                query = String.format("insert into _%s values('%s', '%s', '%s', array[%d, %d])",
                         rs.getString("fid"),
                         rs.getString("courseid"),
+                        rs.getString("coursename"),
                         id,
                         _CURR_SESSION[0],
                         _CURR_SESSION[1]
                         );
+
 //                System.out.println(query);
                 runQuery(query, false);
             }
@@ -465,8 +467,13 @@ public class Student extends abstractUser {
 
                     query = String.format("SELECT * FROM _%s " +
                             "WHERE session = ARRAY[%d, %d]", id, session[0], session[1]);
-
-                    String header = String.format("Academic Session: %d-%d", session[0], session[1]);
+                    String header;
+                    if(Arrays.equals(session, _CURR_SESSION)) {
+                        header = String.format("(Current) Academic Session: %d-%d", session[0], session[1]);
+                    }
+                    else {
+                        header = String.format("Academic Session: %d-%d", session[0], session[1]);
+                    }
                     stmt = connection.createStatement();
                     ResultSet rs2 = stmt.executeQuery(query);
                     float earnedCredits = 0;
@@ -497,7 +504,10 @@ public class Student extends abstractUser {
 
                         registeredCredits += credits;
                         if(status == DataStorage._COMPLETED) {
-                            int gp = dataStorage.GradePointMap.get(grade);
+                            int gp = 0;
+                            if(grade != null) {
+                                gp = dataStorage.GradePointMap.get(grade);
+                            }
                             if (gp != 0) {
                                 earnedCredits += credits;
                                 cumulativeEarnedCreated += credits;
@@ -509,7 +519,7 @@ public class Student extends abstractUser {
                         temp.add(courseName);
                         temp.add(ltpc);
                         temp.add(status == DataStorage._COMPLETED ? "Completed" : "Running");
-                        temp.add(status == DataStorage._COMPLETED ? grade : "N/A");
+                        temp.add(grade != null && status == DataStorage._COMPLETED ? grade : "N/A");
                         data.add(temp);
                     }
                     if(status == DataStorage._COMPLETED) {

@@ -1,6 +1,6 @@
 package org.iitrpr.User;
 
-import org.iitrpr.TestingStuffs;
+import org.iitrpr.utils.fileWriterUtil;
 import org.iitrpr.utils.CLI;
 import org.iitrpr.utils.DataStorage;
 
@@ -533,7 +533,7 @@ abstract class abstractUser {
             switch (input) {
                 case "1" -> {
 //                    generate transcript
-                    TestingStuffs.generateTranscript(sId, TRANSCRIPT.toString());
+                    fileWriterUtil.generateTranscript(sId, TRANSCRIPT.toString());
                     System.out.println(DataStorage.ANSI_GREEN + "Transcript Generated successfully in the documents folder" + DataStorage.ANSI_RESET);
                     runner = true;
                 }
