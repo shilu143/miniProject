@@ -5,12 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="235fdb59-42ee-49a2-bb43-4aeb73ebbbee" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/AcademicOfficeTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/Seeder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/Seeder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/TestingStuffs.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/TestingStuffs.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AcademicOffice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AcademicOffice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/abstractUser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/abstractUser.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,6 +106,9 @@
   <component name="RecentsManager">
     <key name="CreateTestDialog.Recents.Supers">
       <recent name="" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="org.iitrpr.utils" />
     </key>
     <key name="CreateTestDialog.RecentsKey">
       <recent name="org.iitrpr.User" />

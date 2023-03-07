@@ -38,14 +38,15 @@ public class Student extends abstractUser {
 
             ArrayList<String> options = new ArrayList<>();
             options.add("Personal Details");
-            options.add("Student Record");
             options.add("Course Offering");
+            options.add("Student Record");
             options.add("Show Current Event");
             options.add("Check Graduation");
             options.add("Logout");
 
             CLI cli = new CLI();
-            cli.createVSubmenu("Menu","Welcome to AIMS Portal", options);
+            String body = String.format("Welcome to AIMS Portal (%s)", role.toUpperCase());
+            cli.createVSubmenu("Menu",body, options);
             
             Scanner sc = new Scanner(System.in);
             boolean runner;
@@ -55,10 +56,10 @@ public class Student extends abstractUser {
                 String inp = sc.nextLine();
                 switch (inp) {
                     case "1" -> showPersonalDetails(DataStorage._STUDENT);
-                    case "2" -> studentRecord(false);
-                    case "3" -> showCourseOffering();
+                    case "2" -> showCourseOffering();
+                    case "3" -> studentRecord(false);
                     case "4" -> showCurrentEvent();
-                    case "5" -> isGraduated();
+                    case "5" -> graduationCheck();
                     case "6" -> logout();
                     default -> runner = true;
                 }
@@ -392,12 +393,119 @@ public class Student extends abstractUser {
         }
         return creditLimit;
     }
-
-
-    private void isGraduated() {
+    private String generateQuery(String batch, String type) {
+        return String.format("""
+                SELECT SUM(LTP[1] + LTP[2] / 2) AS credits
+                FROM (
+                    SELECT t1.courseid, t2.batch, t2.ltp, t2.type, t1.grade
+                    FROM _2020csb1102 t1
+                    INNER JOIN course_catalog_cse t2
+                        ON t2.courseid = t1.courseid
+                ) table1
+                INNER JOIN (
+                  SELECT courseid, MAX(batch) as max_value
+                  FROM course_catalog_cse table2
+                  WHERE batch <= %s
+                  GROUP BY courseid
+                ) subquery
+                ON table1.courseid = subquery.courseid
+                   AND table1.batch = subquery.max_value
+                WHERE table1.type = lower('%s') AND table1.grade IS NOT NULL
+                    AND LOWER(table1.grade) <> 'f'""", batch, type);
     }
 
-    private void showCurrentEvent() {
+    private void graduationCheck() {
+        ArrayList<Float> earnedCredits = new ArrayList<>();
+        try {
+            String query = generateQuery(id.substring(0, 4),"pc");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+            query = generateQuery(id.substring(0, 4),"ec");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+            query = generateQuery(id.substring(0, 4),"e");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        clearScreen();
+
+        CLI cli = new CLI();
+//        cli.
+        ArrayList<String> title = new ArrayList<>();
+        title.add("Course Type");
+        title.add("Required Credits");
+        title.add("Earned Credits");
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Program Core");
+        options.add("Engineering Core");
+        options.add("Elective");
+        String query = "SELECT * FROM UG_REQ";
+        ArrayList<String> temp = fetchTable(query).get(0);
+        ArrayList<Float> req = new ArrayList<>();
+        for(String vl : temp) {
+            req.add(Float.parseFloat(vl));
+        }
+        cli.createDiff("UG CRITERIA", title, options, req, earnedCredits);
+        boolean flag = true;
+        for(int i = 0; i < req.size(); i++) {
+            if(earnedCredits.get(i) < req.get(i)) {
+                flag = false;
+                break;
+            }
+        }
+        if(flag) {
+            System.out.println("Graduated : " + DataStorage.ANSI_GREEN + "YES" + DataStorage.ANSI_RESET + "\n");
+        }
+        else {
+            System.out.println("Graduated : " + DataStorage.ANSI_RED + "NO" + DataStorage.ANSI_RESET + "\n");
+        }
+        options = new ArrayList<>();
+        options.add("Back");
+        cli.createVSubmenu("Submenu", null, options);
+        Scanner sc = new Scanner(System.in);
+        System.out.print("> ");
+        String inp = sc.next();
+        boolean runner;
+        do {
+            runner = false;
+            switch (inp) {
+                case "1" -> {
+                    //Back
+                }
+                default -> {
+                    runner = true;
+                }
+            }
+        } while(runner);
+    }
+
+    void showCurrentEvent() {
+        clearScreen();
+        fetchEvent();
+        CLI cli = new CLI();
+        ArrayList<String> options = new ArrayList<>();
+        ArrayList<String> data = new ArrayList<>();
+        options.add("Academic Session");
+        options.add("Current Event");
+        data.add(String.format("%d - %d", _CURR_SESSION[0], _CURR_SESSION[1]));
+        data.add(String.format("%s", dataStorage.EventHash.get(_EVENT)));
+        cli.createVerticalTable("EVENT", options, data);
+
+        options = new ArrayList<>();
+        options.add("Back");
+        cli.createVSubmenu("SubMenu", null, options);
+        Scanner sc = new Scanner(System.in);
+        boolean runner;
+        do {
+            runner = false;
+            System.out.print("> ");
+            String inp = sc.nextLine();
+            if (inp.equals("1")) {
+//                    return back
+            } else {
+                runner = true;
+            }
+        } while (runner);
     }
     private ArrayList<ArrayList<String>> fetchOffering(String query) {
         ArrayList<ArrayList<String>> data = new ArrayList<>();
