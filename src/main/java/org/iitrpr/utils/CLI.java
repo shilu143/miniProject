@@ -157,11 +157,11 @@ public class CLI {
         table.addRule();
         table.addRow(options).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);
         table.addRule();
-
-        for (ArrayList<String> datum : data) {
-            table.addRow(datum).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);
-            table.addRule();
-        }
+        if(data != null)
+            for (ArrayList<String> datum : data) {
+                table.addRow(datum).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);
+                table.addRule();
+            }
         table.getRenderer().setCWC(new CWC_LongestLine());
         System.out.println(table.render()+"\n");
     }

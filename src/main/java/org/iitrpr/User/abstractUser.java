@@ -4,6 +4,8 @@ import org.iitrpr.utils.fileWriterUtil;
 import org.iitrpr.utils.CLI;
 import org.iitrpr.utils.DataStorage;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.*;
 import java.util.*;
 
@@ -15,29 +17,22 @@ abstract class abstractUser {
     Integer[] _CURR_SESSION;
     int _EVENT;
     String role;
+//    Scanner sc;
+//    InputStream in;
+//    OutputStream out;
+
     abstractUser(Connection connection, String id, String role) {
         this.connection = connection;
         this.id = id;
         this.role = role;
         isLoggedout = false;
         dataStorage = new DataStorage();
+//        sc = new Scanner(System.in);
+//        this.in = in;
+//        this.out = out;
         System.out.println(DataStorage.ANSI_CYAN + "\n\nAIMS PORTAL WELCOMES U ;)\n" + DataStorage.ANSI_RESET);
     }
 
-    protected String getFacultyName(String fid) {
-        String query = String.format("SELECT name from faculty where LOWER(id) = LOWER('%s')", fid);
-        Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            if(rs.next()) {
-                return rs.getString("name");
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return "";
-    }
     protected boolean runQuery(String query, boolean response) {
         try {
             Statement stmt = connection.createStatement();
@@ -52,11 +47,8 @@ abstract class abstractUser {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 
-
-//    protected
     protected ArrayList<ArrayList<String>> getAllDept() {
         ArrayList<ArrayList<String>> data = new ArrayList<>();
         try {
@@ -79,8 +71,6 @@ abstract class abstractUser {
 
     }
 
-
-
     protected ArrayList<String> fetchData() {
         PreparedStatement st = null;
         try {
@@ -95,7 +85,7 @@ abstract class abstractUser {
             String dept = null;
             String email = null;
             String contact = null;
-            while(rs.next()) {
+            if(rs.next()) {
                 name = rs.getString("name").trim();
                 dept = rs.getString("deptname").trim();
                 email = rs.getString("email").trim();
@@ -116,7 +106,7 @@ abstract class abstractUser {
         }
     }
 
-    void showPersonalDetails(Integer usr) {
+    boolean showPersonalDetails(Integer usr, Scanner sc) {
         boolean outer;
         do {
             outer = false;
@@ -144,7 +134,7 @@ abstract class abstractUser {
 
 
             cli.createVSubmenu("SubMenu", null, options);
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             boolean inner;
             do {
                 inner = false;
@@ -152,7 +142,7 @@ abstract class abstractUser {
                 String inp = sc.nextLine();
                 switch (inp) {
                     case "1" -> {
-                        editPersonalDetails();
+                        editPersonalDetails(sc);
                         outer = true;
                     }
                     case "2" -> {
@@ -161,12 +151,13 @@ abstract class abstractUser {
                     default -> inner = true;
                 }
             } while (inner);
-        }   while(outer);
+        } while(outer);
+        return true;
     }
 
 
 
-    protected void viewCourseCatalog() {
+    protected void viewCourseCatalog(Scanner sc) {
         clearScreen();
         CLI cli = new CLI();
         ArrayList<String> options = new ArrayList<>();
@@ -176,7 +167,7 @@ abstract class abstractUser {
         }
         options.add("Back");
         cli.createVSubmenu("Choose Department", null, options);
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean runner;
         do {
             runner = false;
@@ -184,7 +175,7 @@ abstract class abstractUser {
             String inp = sc.nextLine().trim();
             try {
                 int vl = Integer.parseInt(inp);
-                if(vl >= 1 && vl <= dept.size()) showDeptCourse(dept.get(vl - 1).get(0));
+                if(vl >= 1 && vl <= dept.size()) showDeptCourse(dept.get(vl - 1).get(0), sc);
                 else if(vl == dept.size() + 1) {
 //                    return to previous method
                 }
@@ -197,78 +188,76 @@ abstract class abstractUser {
         } while(runner);
     }
 
-    private void showDeptCourse(String deptid) {
+    private void showDeptCourse(String deptid, Scanner sc) {
         clearScreen();
         boolean outer;
+        outer = false;
+        CLI cli = new CLI();
+        String query = String.format("SELECT * FROM course_catalog_%s", deptid);
+        ArrayList<ArrayList<String>> data = fetchTable(query);
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Course ID");
+        options.add("Course Name");
+        options.add("LTP");
+        options.add("Prerequisites");
+        options.add("Type");
+        options.add("Batch Onwards");
+        cli.recordPrint(deptid.toUpperCase() + " Courses",options, data, null, null);
+        options = new ArrayList<>();
+        if(role.equalsIgnoreCase("office")) {
+            options.add("Add New Course");
+            options.add("Edit Course");
+        }
+        else if(role.equalsIgnoreCase("faculty")) {
+            options.add("Float Course");
+        }
+        options.add("Back");
+        cli.createVSubmenu("Menu", null, options);
+
+//        Scanner sc = new Scanner(System.in);
+        boolean runner;
         do {
-            outer = false;
-            CLI cli = new CLI();
-            String query = String.format("SELECT * FROM course_catalog_%s", deptid);
-            ArrayList<ArrayList<String>> data = fetchTable(query);
-            ArrayList<String> options = new ArrayList<>();
-            options.add("Course ID");
-            options.add("Course Name");
-            options.add("LTP");
-            options.add("Prerequisites");
-            options.add("Type");
-            options.add("Batch Onwards");
-            cli.recordPrint(deptid.toUpperCase() + " Courses",options, data, null, null);
-            options = new ArrayList<>();
+            runner = false;
+            System.out.print("> ");
+            String inp = sc.nextLine().trim();
             if(role.equalsIgnoreCase("office")) {
-                options.add("Add New Course");
-                options.add("Edit Course");
-            }
-            else if(role.equalsIgnoreCase("faculty")) {
-                options.add("Float Course");
-            }
-            options.add("Back");
-            cli.createVSubmenu("Menu", null, options);
-
-            Scanner sc = new Scanner(System.in);
-            boolean runner;
-            do {
-                runner = false;
-                System.out.print("> ");
-                String inp = sc.nextLine().trim();
-                if(role.equalsIgnoreCase("office")) {
-                    switch (inp) {
-                        case "1" -> {
-                            addNewCourseinCatalog(deptid);
-                            runner = true;
-                        }
-                        case "2" -> {
-                            editCourseCatalog(deptid);
-                            runner = true;
-                        }
-
-                        case "3" -> {
-                            //                    return back
-                        }
-                        default -> runner = true;
+                switch (inp) {
+                    case "1" -> {
+                        addNewCourseinCatalog(deptid, sc);
+                        runner = true;
                     }
+                    case "2" -> {
+                        editCourseCatalog(deptid, sc);
+                        runner = true;
+                    }
+
+                    case "3" -> {
+                        //                    return back
+                    }
+                    default -> runner = true;
                 }
-                else {
-                    switch (inp) {
-                        case "1" -> {
-                            floatCourse(deptid);
-                            runner = true;
-                        }
-                        case "2" -> {
+            }
+            else {
+                switch (inp) {
+                    case "1" -> {
+                        floatCourse(deptid, sc);
+                        runner = true;
+                    }
+                    case "2" -> {
 //                            return back
-                        }
-                        default -> runner = true;
                     }
+                    default -> runner = true;
                 }
-            } while(runner);
-        }   while(outer);
+            }
+        } while(runner);
     }
 
-    protected abstract void floatCourse(String deptid);
+    protected abstract void floatCourse(String deptid, Scanner sc);
 
 
-    protected abstract void editCourseCatalog(String deptid);
+    protected abstract void editCourseCatalog(String deptid, Scanner sc);
 
-    protected abstract void addNewCourseinCatalog(String deptid);
+    protected abstract void addNewCourseinCatalog(String deptid, Scanner sc);
 
 
 
@@ -280,7 +269,7 @@ abstract class abstractUser {
         try {
             stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(query);
-            while(rs.next()) {
+            if(rs.next()) {
                 _EVENT = rs.getInt("_EVENT");
                 Array rsString = rs.getArray("_SESSION");
                 if (rsString != null) {
@@ -326,14 +315,14 @@ abstract class abstractUser {
         }
     }
 
-    abstract void showMenu();
+    abstract void showMenu(Scanner sc);
     protected void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
-    void editPersonalDetails() {
+    boolean editPersonalDetails(Scanner sc) {
         System.out.print("Enter your new Contact number = ");
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         String newContact = sc.nextLine();
         String query = String.format(
                 "UPDATE %s " +
@@ -344,8 +333,10 @@ abstract class abstractUser {
             Statement stmt = connection.createStatement();
             stmt.execute(query);
             stmt.close();
+            return true;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
+//            throw new RuntimeException(e);
         }
     }
     protected void logout() {

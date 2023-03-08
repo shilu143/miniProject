@@ -4,7 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.commons.lang3.StringUtils;
-import org.mindrot.jbcrypt.BCrypt;
+
 
 import java.io.File;
 import java.io.FileReader;
@@ -16,7 +16,7 @@ import java.util.Scanner;
 
 public class Seeder {
 
-    public void generateSchema(Connection connection) {
+    public boolean generateSchema(Connection connection) {
         try {
             String query = "";
             try {
@@ -30,9 +30,11 @@ public class Seeder {
             stmt.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return false;
         }
+        return true;
     }
-    public void fill(Connection connection) {
+    public boolean fill(Connection connection) {
             try {
                 File file1 = new File("./assets/data/seedHelper.csv");
                 File file2 = new File("./assets/data/department.csv");
@@ -52,13 +54,12 @@ public class Seeder {
                     String contact = input[5];
                     String password = input[6];
 
-                    String hashedPass = BCrypt.hashpw(password, BCrypt.gensalt(12));
 
                     try {
                         PreparedStatement st = connection.prepareStatement("INSERT INTO _USER VALUES (?, ?, ?)");
                         st.setString(1, id);
                         st.setString(2, role);
-                        st.setString(3, hashedPass);
+                        st.setString(3, password);
                         st.executeUpdate();
 
                         String query = String.format("INSERT INTO %s VALUES (?, ?, ?, ?, ?)", role.toUpperCase());
@@ -192,11 +193,14 @@ public class Seeder {
                         }
                     } catch (SQLException exception) {
                         System.out.println(exception.getMessage());
+                        return false;
                     }
                 }
             } catch (IOException e) {
                 System.out.print(e.getLocalizedMessage());
+                return false;
             }
+            return true;
     }
     public static void main(String[] args) {
         Seeder seed = new Seeder();

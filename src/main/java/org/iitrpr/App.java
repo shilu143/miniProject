@@ -3,7 +3,6 @@ package org.iitrpr;
 import org.iitrpr.User.*;
 import java.sql.*;
 import java.util.Scanner;
-import org.mindrot.jbcrypt.*;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import static java.lang.System.exit;
@@ -15,7 +14,7 @@ public class App {
 
     boolean SUCCESS = true;
     boolean FAILURE = false;
-    public boolean authenticate(Connection connection, String username, String pass) {
+    public boolean authenticate(Connection connection, String username, String pass, Scanner sc) {
         String QUERY = String.format("SELECT * FROM _USER " +
                 "WHERE LOWER(id) = LOWER('%s')", username);
         try {
@@ -23,28 +22,28 @@ public class App {
             ResultSet rs = stmt.executeQuery(QUERY);
             String id = null;
             String role = null;
-            String hashedpass = null;
+            String actualPass = null;
 
-            while (rs.next()) {
+            if (rs.next()) {
                 id = rs.getString("id");
                 role = rs.getString("role");
-                hashedpass = rs.getString("hashedpass");
+                actualPass = rs.getString("pass");
             }
-            if (id != null && BCrypt.checkpw(pass, hashedpass)) {
+            if (id != null && actualPass.equals(pass)) {
                 if(role.equalsIgnoreCase("student")) {
                     Student student = new Student(connection, id, role);
-                    student.showMenu();
+                    student.showMenu(sc);
                 }
                 else if(role.equalsIgnoreCase("faculty")) {
                     Faculty faculty = new Faculty(connection, id, role);
-                    faculty.showMenu();
+                    faculty.showMenu(sc);
                 }
                 else if(role.equalsIgnoreCase("office")) {
                     AcademicOffice acad = new AcademicOffice(connection, id, role);
-                    acad.showMenu();
+                    acad.showMenu(sc);
                 }
                 else {
-                    System.out.println(ANSI_RED + "No Such role exist" + ANSI_RESET);
+                    return FAILURE;
                 }
                 return SUCCESS;
             } else {
@@ -52,7 +51,7 @@ public class App {
                 return FAILURE;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return FAILURE;
         }
     }
 
@@ -82,7 +81,7 @@ public class App {
         String username = sc.nextLine().trim();
         System.out.print("Enter your password : ");
         String password = sc.nextLine().trim();
-        while (!app.authenticate(connection, username, password)) {
+        while (!app.authenticate(connection, username, password, sc)) {
             System.out.print("Enter your ID : ");
             username = sc.nextLine().trim();
             System.out.print("Enter your password : ");

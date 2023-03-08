@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Faculty extends abstractUser {
+//    Scanner sc;
     public Faculty(Connection connection, String id, String role) {
         super(connection, id, role);
+//        sc = new Scanner(System.in);
     }
 
     @Override
-    public void showMenu() {
+    public void showMenu(Scanner sc) {
         do {
             clearScreen();
 
@@ -33,21 +35,22 @@ public class Faculty extends abstractUser {
             options.add("Logout");
 
             CLI cli = new CLI();
-            cli.createVSubmenu("Menu","Welcome to AIMS Portal", options);
+            String body = String.format("Welcome to AIMS Portal (%s)", role.toUpperCase());
+            cli.createVSubmenu("Menu",body, options);
 
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             boolean runner;
             do {
                 runner = false;
                 System.out.print("> ");
                 String inp = sc.nextLine();
                 switch (inp) {
-                    case "1" -> showPersonalDetails(DataStorage._FACULTY);
-                    case "2" -> viewCourseCatalog();
-                    case "3" -> showCourseOffering();
-                    case "4" -> showFacultyRecord();
-                    case "5" -> viewStudentRecord();
-                    case "6" -> showCurrentEvent();
+                    case "1" -> showPersonalDetails(DataStorage._FACULTY, sc);
+                    case "2" -> viewCourseCatalog(sc);
+                    case "3" -> showCourseOffering(sc);
+                    case "4" -> showFacultyRecord(sc);
+                    case "5" -> viewStudentRecord(sc);
+                    case "6" -> showCurrentEvent(sc);
                     case "7" -> logout();
                     default -> runner = true;
                 }
@@ -55,9 +58,9 @@ public class Faculty extends abstractUser {
         } while(!isLoggedout);
     }
 
-    void viewStudentRecord() {
+    void viewStudentRecord(Scanner sc) {
         String sId = null;
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean isValid = false;
         while(!isValid) {
             System.out.print("Enter the Student ID = ");
@@ -202,7 +205,7 @@ public class Faculty extends abstractUser {
     }
 
 
-    void showCurrentEvent() {
+    void showCurrentEvent(Scanner sc) {
         clearScreen();
         fetchEvent();
         CLI cli = new CLI();
@@ -217,7 +220,7 @@ public class Faculty extends abstractUser {
         options = new ArrayList<>();
         options.add("Back");
         cli.createVSubmenu("SubMenu", null, options);
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean runner;
         do {
             runner = false;
@@ -230,7 +233,7 @@ public class Faculty extends abstractUser {
             }
         } while (runner);
     }
-    private void showFacultyRecord() {
+    private void showFacultyRecord(Scanner sc) {
         boolean outer;
         CLI cli = new CLI();
         ArrayList<String> options = new ArrayList<>();
@@ -283,7 +286,7 @@ public class Faculty extends abstractUser {
             options.add("Back");
 
             cli.createVSubmenu("SubMenu", null, options);
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             boolean runner;
             do {
                 runner = false;
@@ -291,14 +294,14 @@ public class Faculty extends abstractUser {
                 String inp = sc.nextLine();
                 switch (inp) {
                     case "1" -> {
-                        if(dropCourse())
+                        if(dropCourse(sc))
                             outer = true;
                         else
                             runner = true;
                     }
 
                     case "2" -> {
-                        uploadGrades();
+                        uploadGrades(sc);
                         runner = true;
                     }
                     case "3" -> {
@@ -349,13 +352,13 @@ public class Faculty extends abstractUser {
     }
 
 
-    private boolean dropCourse() {
+    protected boolean dropCourse(Scanner sc) {
         fetchEvent();
         if(_EVENT != DataStorage._COURSE_FLOAT_START) {
             System.out.println(DataStorage.ANSI_RED + "Currently you can't drop course" + DataStorage.ANSI_RESET);
             return false;
         }
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         System.out.print("Enter courseId = ");
         String courseId = sc.nextLine();
         if(!dropCourseUtil(true, courseId)) {
@@ -366,14 +369,14 @@ public class Faculty extends abstractUser {
         return true;
     }
 
-    private void uploadGrades() {
+    private void uploadGrades(Scanner sc) {
         fetchEvent();
         if(_EVENT != DataStorage._GRADE_SUBMISSION_START) {
             System.out.println(DataStorage.ANSI_RED + "Grade submission is not allowed currently" + DataStorage.ANSI_RESET);
             return;
         }
         System.out.print("Enter courseId = ");
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         String courseId = sc.nextLine();
         if(!dropCourseUtil(true, courseId)) {
             System.out.println(DataStorage.ANSI_RED + "No such course is floated by you in the current semester" + DataStorage.ANSI_RESET);
@@ -434,7 +437,7 @@ public class Faculty extends abstractUser {
     }
 
 
-    void showCourseOffering() {
+    void showCourseOffering(Scanner sc) {
         clearScreen();
         CLI cli = new CLI();
         ArrayList<String> options = new ArrayList<>();
@@ -444,7 +447,7 @@ public class Faculty extends abstractUser {
         }
         options.add("Back");
         cli.createVSubmenu("Choose Department", null, options);
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean runner;
         do {
             runner = false;
@@ -452,7 +455,7 @@ public class Faculty extends abstractUser {
             String inp = sc.nextLine().trim();
             try {
                 int vl = Integer.parseInt(inp);
-                if(vl >= 1 && vl <= dept.size()) showDeptOffering(dept.get(vl - 1).get(0));
+                if(vl >= 1 && vl <= dept.size()) showDeptOffering(dept.get(vl - 1).get(0), sc);
                 else if(vl == dept.size() + 1) {
 //                    return to previous method
                 }
@@ -465,12 +468,12 @@ public class Faculty extends abstractUser {
         } while(runner);
     }
 
-    private void showDeptOffering(String deptId) {
+    private void showDeptOffering(String deptId, Scanner sc) {
         boolean validInput = false;
         int year = 0;
         while(!validInput) {
             System.out.print("Enter year (1, 2, 3, 4) = ");
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             String inp = sc.next();
             try{
                 year = Integer.parseInt(inp);
@@ -545,7 +548,7 @@ public class Faculty extends abstractUser {
         boolean runner;
         do {
             runner = false;
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             System.out.print("> ");
             String inp = sc.next();
             switch (inp) {
@@ -559,7 +562,7 @@ public class Faculty extends abstractUser {
         } while(runner);
     }
 
-    private void showDeptCourse(String deptid) {
+    private void showDeptCourse(String deptid, Scanner sc) {
         clearScreen();
 
         CLI cli = new CLI();
@@ -579,7 +582,7 @@ public class Faculty extends abstractUser {
         options.add("Back");
         cli.createVSubmenu("Menu", null, options);
 
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean runner;
         do {
             runner = false;
@@ -587,7 +590,7 @@ public class Faculty extends abstractUser {
             String inp = sc.nextLine().trim();
             switch (inp) {
                 case "1" -> {
-                    floatCourse(deptid);
+                    floatCourse(deptid, sc);
                     runner = true;
                 }
                 case "2" -> {
@@ -599,24 +602,24 @@ public class Faculty extends abstractUser {
     }
 
     @Override
-    protected void editCourseCatalog(String deptid) {
+    protected void editCourseCatalog(String deptid, Scanner sc) {
 //        return null;
     }
 
     @Override
-    protected void addNewCourseinCatalog(String deptid) {
+    protected void addNewCourseinCatalog(String deptid, Scanner sc) {
 //        return null;
     }
 
     @Override
-    public void floatCourse(String deptId) {
+    public void floatCourse(String deptId, Scanner sc) {
         fetchEvent();
         if(_EVENT != DataStorage._COURSE_FLOAT_START) {
             System.out.println(DataStorage.ANSI_RED + "Currently not allowed to float course" + DataStorage.ANSI_RESET);
             return;
         }
         System.out.print("Enter the course ID = ");
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         String courseId = sc.nextLine();
         String query = String.format("SELECT * FROM COURSE_CATALOG_%s where courseid = lower('%s')", deptId, courseId);
         if(!runQuery(query, true)) {
@@ -635,7 +638,7 @@ public class Faculty extends abstractUser {
             }
         }
         float cgCriteria = (float) -1;
-        if(isValidInp("Do the course have any cg criteria(y/n) = ")) {
+        if(isValidInp("Do the course have any cg criteria(y/n) = ", sc)) {
             boolean isvalid = false;
             while(!isvalid) {
                 try {
@@ -652,10 +655,10 @@ public class Faculty extends abstractUser {
             }
         }
         ArrayList<Boolean> yearsAllowed = new ArrayList<>();
-        yearsAllowed.add(isValidInp("Is 1st year allowed(y/n) = "));
-        yearsAllowed.add(isValidInp("Is 2nd year allowed(y/n) = "));
-        yearsAllowed.add(isValidInp("Is 3rd year allowed(y/n) = "));
-        yearsAllowed.add(isValidInp("Is 4th year allowed(y/n) = "));
+        yearsAllowed.add(isValidInp("Is 1st year allowed(y/n) = ", sc));
+        yearsAllowed.add(isValidInp("Is 2nd year allowed(y/n) = ", sc));
+        yearsAllowed.add(isValidInp("Is 3rd year allowed(y/n) = ", sc));
+        yearsAllowed.add(isValidInp("Is 4th year allowed(y/n) = ", sc));
 
         ArrayList<Boolean> deptAllowed = new ArrayList<>();
         for (ArrayList<String> strings : allDept) {
@@ -685,8 +688,8 @@ public class Faculty extends abstractUser {
         System.out.println(DataStorage.ANSI_GREEN + "Course Floated Successfully" + DataStorage.ANSI_RESET);
     }
 
-    boolean isValidInp(String ques) {
-        Scanner sc = new Scanner(System.in);
+    boolean isValidInp(String ques, Scanner sc) {
+//        Scanner sc = new Scanner(System.in);
         while(true) {
             System.out.print(ques);
             String inp = sc.nextLine();

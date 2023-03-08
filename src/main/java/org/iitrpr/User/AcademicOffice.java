@@ -12,16 +12,16 @@ import java.util.Scanner;
 public class AcademicOffice extends abstractUser{
     public AcademicOffice(Connection connection, String id, String role) {
         super(connection, id, role);
-
+//        sc = new Scanner(System.in);
     }
 
     @Override
-    protected void floatCourse(String deptid) {
+    protected void floatCourse(String deptid, Scanner sc) {
 //return null;
     }
 
     @Override
-    public void showMenu() {
+    public void showMenu(Scanner sc) {
         do {
             clearScreen();
 
@@ -35,21 +35,22 @@ public class AcademicOffice extends abstractUser{
             options.add("Logout");
 
             CLI cli = new CLI();
-            cli.createVSubmenu("Menu","Welcome to AIMS Portal", options);
+            String body = String.format("Welcome to AIMS Portal (%s)", role.toUpperCase());
+            cli.createVSubmenu("Menu",body, options);
 
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             boolean runner;
             do {
                 runner = false;
                 System.out.print("> ");
                 String inp = sc.nextLine();
                 switch (inp) {
-                    case "1" -> showPersonalDetails(DataStorage._OFFICE);
-                    case "2" -> viewCourseCatalog();
-                    case "3" -> showCourseOffering();
-                    case "4" -> viewStudentRecord();
-                    case "5" -> currentEvent();
-                    case "6" -> graduationCheck();
+                    case "1" -> showPersonalDetails(DataStorage._OFFICE, sc);
+                    case "2" -> viewCourseCatalog(sc);
+                    case "3" -> showCourseOffering(sc);
+                    case "4" -> viewStudentRecord(sc);
+                    case "5" -> currentEvent(sc);
+                    case "6" -> graduationCheck(sc);
                     case "7" -> logout();
                     default -> runner = true;
                 }
@@ -58,7 +59,7 @@ public class AcademicOffice extends abstractUser{
     }
 
 
-    void showCourseOffering() {
+    void showCourseOffering(Scanner sc) {
         clearScreen();
         CLI cli = new CLI();
         ArrayList<String> options = new ArrayList<>();
@@ -68,7 +69,7 @@ public class AcademicOffice extends abstractUser{
         }
         options.add("Back");
         cli.createVSubmenu("Choose Department", null, options);
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean runner;
         do {
             runner = false;
@@ -76,7 +77,7 @@ public class AcademicOffice extends abstractUser{
             String inp = sc.nextLine().trim();
             try {
                 int vl = Integer.parseInt(inp);
-                if(vl >= 1 && vl <= dept.size()) showDeptOffering(dept.get(vl - 1).get(0));
+                if(vl >= 1 && vl <= dept.size()) showDeptOffering(dept.get(vl - 1).get(0), sc);
                 else if(vl == dept.size() + 1) {
 //                    return to previous method
                 }
@@ -89,219 +90,9 @@ public class AcademicOffice extends abstractUser{
         } while(runner);
     }
 
-    private void showDeptOffering(String deptId) {
-        boolean validInput = false;
-        int year = 0;
-        while(!validInput) {
-            System.out.print("Enter year (1, 2, 3, 4) = ");
-            Scanner sc = new Scanner(System.in);
-            String inp = sc.next();
-            try{
-                year = Integer.parseInt(inp);
-                if(year < 1 || year > 4) {
-                    System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
-                }
-                else {
-                    validInput = true;
-                }
-            } catch (NumberFormatException e) {
-                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
-            }
-        }
-
-        clearScreen();
-        fetchEvent();
-        String tabName = String.format("y%d_%s_offering", year, deptId);
-        String query = String.format("""
-            SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
-                FROM (
-                    SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
-                    FROM %s t1
-                    INNER JOIN course_catalog_%s t2
-                    ON t2.courseid = t1.courseid
-                ) table1
-            INNER JOIN (
-                SELECT courseid, MAX(batch) as max_value
-                FROM course_catalog_cse table2
-                WHERE batch <= %d
-                GROUP BY courseid
-            ) subquery
-            ON table1.courseid = subquery.courseid
-            AND table1.batch = subquery.max_value
-            INNER JOIN faculty t3 on table1.fid = t3.id
-            WHERE lower(table1.type) <> lower('e');
-        """, tabName, deptId, _CURR_SESSION[0] - year + 1);
-        ArrayList<ArrayList<String>> data = fetchTable(query);
-        ArrayList<String> options  = new ArrayList<>();
-        options.add("Course ID");
-        options.add("Course Name");
-        options.add("LTP");
-        options.add("Prerequisites");
-        options.add("Type");
-        options.add("CG Criteria");
-        options.add("Instructor");
-        CLI cli = new CLI();
-        cli.recordPrint("Core Courses", options, data, null, null);
-        query = String.format("""
-            SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
-                FROM (
-                    SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
-                    FROM %s t1
-                    INNER JOIN course_catalog_%s t2
-                    ON t2.courseid = t1.courseid
-                ) table1
-            INNER JOIN (
-                SELECT courseid, MAX(batch) as max_value
-                FROM course_catalog_cse table2
-                WHERE batch <= %d
-                GROUP BY courseid
-            ) subquery
-            ON table1.courseid = subquery.courseid
-            AND table1.batch = subquery.max_value
-            INNER JOIN faculty t3 on table1.fid = t3.id
-            WHERE lower(table1.type) = lower('e');
-        """, tabName, deptId, _CURR_SESSION[0] - year + 1);
-        data = fetchTable(query);
-        cli.recordPrint("Elective Courses", options, data, null, null);
-        options = new ArrayList<>();
-        options.add("Back");
-        cli.createVSubmenu("Sub Menu", null, options);
-        boolean runner;
-        do {
-            runner = false;
-            Scanner sc = new Scanner(System.in);
-            System.out.print("> ");
-            String inp = sc.next();
-            switch (inp) {
-                case "1" -> {
-//                    return back
-                }
-                default -> {
-                    runner = true;
-                }
-            }
-        } while(runner);
-    }
-    private void graduationCheck() {
+    void viewStudentRecord(Scanner sc) {
         String sId = null;
-        Scanner sc = new Scanner(System.in);
-        boolean isValid = false;
-        while(!isValid) {
-            System.out.print("Enter the Student ID = ");
-            sId = sc.next();
-            String query = String.format("select * from student where lower(id) = lower('%s')", sId);
-            if(runQuery(query, true)) {
-                isValid = true;
-            }
-            else {
-                System.out.println(DataStorage.ANSI_RED + "There is no student with that id" + DataStorage.ANSI_RESET);
-            }
-        }
-        ArrayList<Float> earnedCredits = new ArrayList<>();
-        try {
-            String query = generateQuery(sId.substring(0, 4),"pc");
-            earnedCredits.add(getResultSet(query).getFloat("credits"));
-            query = generateQuery(sId.substring(0, 4),"ec");
-            earnedCredits.add(getResultSet(query).getFloat("credits"));
-            query = generateQuery(sId.substring(0, 4),"e");
-            earnedCredits.add(getResultSet(query).getFloat("credits"));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        clearScreen();
-
-        CLI cli = new CLI();
-//        cli.
-        ArrayList<String> title = new ArrayList<>();
-        title.add("Course Type");
-        title.add("Required Credits");
-        title.add("Earned Credits");
-        ArrayList<String> options = new ArrayList<>();
-        options.add("Program Core");
-        options.add("Engineering Core");
-        options.add("Elective");
-        String query = "SELECT * FROM UG_REQ";
-        ArrayList<String> temp = fetchTable(query).get(0);
-        ArrayList<Float> req = new ArrayList<>();
-        for(String vl : temp) {
-            req.add(Float.parseFloat(vl));
-        }
-        cli.createDiff("UG CRITERIA", title, options, req, earnedCredits);
-        boolean flag = true;
-        for(int i = 0; i < req.size(); i++) {
-            if(earnedCredits.get(i) < req.get(i)) {
-                flag = false;
-                break;
-            }
-        }
-        if(flag) {
-            System.out.println("Graduated : " + DataStorage.ANSI_GREEN + "YES" + DataStorage.ANSI_RESET + "\n");
-        }
-        else {
-            System.out.println("Graduated : " + DataStorage.ANSI_RED + "NO" + DataStorage.ANSI_RESET + "\n");
-        }
-        options = new ArrayList<>();
-        options.add("Back");
-        cli.createVSubmenu("Submenu", null, options);
-        System.out.print("> ");
-        String inp = sc.next().trim();
-        boolean runner;
-        do {
-            runner = false;
-            switch (inp) {
-                case "1" -> {
-                //Back
-                }
-                default -> {
-                    runner = true;
-                }
-            }
-        } while(runner);
-    }
-
-    void currentEvent() {
-        boolean outer;
-        do {
-            outer = false;
-            clearScreen();
-            fetchEvent();
-            CLI cli = new CLI();
-            ArrayList<String> options = new ArrayList<>();
-            ArrayList<String> data = new ArrayList<>();
-            options.add("Academic Session");
-            options.add("Current Event");
-            data.add(String.format("%d - %d", _CURR_SESSION[0], _CURR_SESSION[1]));
-            data.add(String.format("%s", dataStorage.EventHash.get(_EVENT)));
-            cli.createVerticalTable("EVENT", options, data);
-
-            options = new ArrayList<>();
-            options.add("Create New Event");
-            options.add("Back");
-            cli.createVSubmenu("SubMenu", null, options);
-            Scanner sc = new Scanner(System.in);
-            boolean runner;
-            do {
-                runner = false;
-                System.out.print("> ");
-                String inp = sc.nextLine();
-                switch (inp) {
-                    case "1" -> {
-                        createNewEvent();
-                        outer = true;
-                    }
-                    case "2" -> {
-//                    back
-                    }
-                    default -> runner = true;
-                }
-            } while (runner);
-        } while(outer);
-    }
-
-    void viewStudentRecord() {
-        String sId = null;
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean isValid = false;
         while(!isValid) {
             System.out.print("Enter the Student ID = ");
@@ -473,7 +264,219 @@ public class AcademicOffice extends abstractUser{
         } while(runner);
 //        } while(outer);
     }
-    private void createNewEvent() {
+
+    private void showDeptOffering(String deptId, Scanner sc) {
+        boolean validInput = false;
+        int year = 0;
+        while(!validInput) {
+            System.out.print("Enter year (1, 2, 3, 4) = ");
+//            Scanner sc = new Scanner(System.in);
+            String inp = sc.next();
+            try{
+                year = Integer.parseInt(inp);
+                if(year < 1 || year > 4) {
+                    System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                }
+                else {
+                    validInput = true;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+            }
+        }
+
+        clearScreen();
+        fetchEvent();
+        String tabName = String.format("y%d_%s_offering", year, deptId);
+        String query = String.format("""
+            SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
+                FROM (
+                    SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
+                    FROM %s t1
+                    INNER JOIN course_catalog_%s t2
+                    ON t2.courseid = t1.courseid
+                ) table1
+            INNER JOIN (
+                SELECT courseid, MAX(batch) as max_value
+                FROM course_catalog_cse table2
+                WHERE batch <= %d
+                GROUP BY courseid
+            ) subquery
+            ON table1.courseid = subquery.courseid
+            AND table1.batch = subquery.max_value
+            INNER JOIN faculty t3 on table1.fid = t3.id
+            WHERE lower(table1.type) <> lower('e');
+        """, tabName, deptId, _CURR_SESSION[0] - year + 1);
+        ArrayList<ArrayList<String>> data = fetchTable(query);
+        ArrayList<String> options  = new ArrayList<>();
+        options.add("Course ID");
+        options.add("Course Name");
+        options.add("LTP");
+        options.add("Prerequisites");
+        options.add("Type");
+        options.add("CG Criteria");
+        options.add("Instructor");
+        CLI cli = new CLI();
+        cli.recordPrint("Core Courses", options, data, null, null);
+        query = String.format("""
+            SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
+                FROM (
+                    SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
+                    FROM %s t1
+                    INNER JOIN course_catalog_%s t2
+                    ON t2.courseid = t1.courseid
+                ) table1
+            INNER JOIN (
+                SELECT courseid, MAX(batch) as max_value
+                FROM course_catalog_cse table2
+                WHERE batch <= %d
+                GROUP BY courseid
+            ) subquery
+            ON table1.courseid = subquery.courseid
+            AND table1.batch = subquery.max_value
+            INNER JOIN faculty t3 on table1.fid = t3.id
+            WHERE lower(table1.type) = lower('e');
+        """, tabName, deptId, _CURR_SESSION[0] - year + 1);
+        data = fetchTable(query);
+        cli.recordPrint("Elective Courses", options, data, null, null);
+        options = new ArrayList<>();
+        options.add("Back");
+        cli.createVSubmenu("Sub Menu", null, options);
+        boolean runner;
+        do {
+            runner = false;
+//            Scanner sc = new Scanner(System.in);
+            System.out.print("> ");
+            String inp = sc.next();
+            switch (inp) {
+                case "1" -> {
+//                    return back
+                }
+                default -> {
+                    runner = true;
+                }
+            }
+        } while(runner);
+    }
+    private void graduationCheck(Scanner sc) {
+        String sId = null;
+//        Scanner sc = new Scanner(System.in);
+        boolean isValid = false;
+        while(!isValid) {
+            System.out.print("Enter the Student ID = ");
+            sId = sc.next();
+            String query = String.format("select * from student where lower(id) = lower('%s')", sId);
+            if(runQuery(query, true)) {
+                isValid = true;
+            }
+            else {
+                System.out.println(DataStorage.ANSI_RED + "There is no student with that id" + DataStorage.ANSI_RESET);
+            }
+        }
+        ArrayList<Float> earnedCredits = new ArrayList<>();
+        try {
+            String query = generateQuery(sId.substring(0, 4),"pc");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+            query = generateQuery(sId.substring(0, 4),"ec");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+            query = generateQuery(sId.substring(0, 4),"e");
+            earnedCredits.add(getResultSet(query).getFloat("credits"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        clearScreen();
+
+        CLI cli = new CLI();
+//        cli.
+        ArrayList<String> title = new ArrayList<>();
+        title.add("Course Type");
+        title.add("Required Credits");
+        title.add("Earned Credits");
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Program Core");
+        options.add("Engineering Core");
+        options.add("Elective");
+        String query = "SELECT * FROM UG_REQ";
+        ArrayList<String> temp = fetchTable(query).get(0);
+        ArrayList<Float> req = new ArrayList<>();
+        for(String vl : temp) {
+            req.add(Float.parseFloat(vl));
+        }
+        cli.createDiff("UG CRITERIA", title, options, req, earnedCredits);
+        boolean flag = true;
+        for(int i = 0; i < req.size(); i++) {
+            if(earnedCredits.get(i) < req.get(i)) {
+                flag = false;
+                break;
+            }
+        }
+        if(flag) {
+            System.out.println("Graduated : " + DataStorage.ANSI_GREEN + "YES" + DataStorage.ANSI_RESET + "\n");
+        }
+        else {
+            System.out.println("Graduated : " + DataStorage.ANSI_RED + "NO" + DataStorage.ANSI_RESET + "\n");
+        }
+        options = new ArrayList<>();
+        options.add("Back");
+        cli.createVSubmenu("Submenu", null, options);
+        System.out.print("> ");
+        String inp = sc.next().trim();
+        boolean runner;
+        do {
+            runner = false;
+            switch (inp) {
+                case "1" -> {
+                //Back
+                }
+                default -> {
+                    runner = true;
+                }
+            }
+        } while(runner);
+    }
+
+    void currentEvent(Scanner sc) {
+        boolean outer;
+        do {
+            outer = false;
+            clearScreen();
+            fetchEvent();
+            CLI cli = new CLI();
+            ArrayList<String> options = new ArrayList<>();
+            ArrayList<String> data = new ArrayList<>();
+            options.add("Academic Session");
+            options.add("Current Event");
+            data.add(String.format("%d - %d", _CURR_SESSION[0], _CURR_SESSION[1]));
+            data.add(String.format("%s", dataStorage.EventHash.get(_EVENT)));
+            cli.createVerticalTable("EVENT", options, data);
+
+            options = new ArrayList<>();
+            options.add("Create New Event");
+            options.add("Back");
+            cli.createVSubmenu("SubMenu", null, options);
+//            Scanner sc = new Scanner(System.in);
+            boolean runner;
+            do {
+                runner = false;
+                System.out.print("> ");
+                String inp = sc.nextLine();
+                switch (inp) {
+                    case "1" -> {
+                        createNewEvent(sc);
+                        outer = true;
+                    }
+                    case "2" -> {
+//                    back
+                    }
+                    default -> runner = true;
+                }
+            } while (runner);
+        } while(outer);
+    }
+
+
+    private void createNewEvent(Scanner sc) {
         clearScreen();
         CLI cli = new CLI();
         ArrayList<String> options = new ArrayList<>();
@@ -487,7 +490,7 @@ public class AcademicOffice extends abstractUser{
         options.add("End the Semester");
         options.add("Back");
         cli.createVSubmenu("SubMenu", null, options);
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean runner;
         do {
             runner = false;
@@ -569,13 +572,13 @@ public class AcademicOffice extends abstractUser{
 
 
     @Override
-    public void addNewCourseinCatalog(String deptId) {
+    public void addNewCourseinCatalog(String deptId, Scanner sc) {
         fetchEvent();
         if(_EVENT > DataStorage._SEMESTER_START && _EVENT < DataStorage._SEMESTER_END) {
             System.out.println("Sorry currently you can't edit the course Catalog");
             return;
         }
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         String courseId = null;
         String courseName = null;
         Integer[] ltp = new Integer[3];
@@ -686,13 +689,13 @@ public class AcademicOffice extends abstractUser{
         return values.length == 3;
     }
     @Override
-    public void editCourseCatalog(String deptId) {
+    public void editCourseCatalog(String deptId, Scanner sc) {
         fetchEvent();
         if(_EVENT > DataStorage._SEMESTER_START && _EVENT < DataStorage._SEMESTER_END) {
             System.out.println("Sorry you can't edit the course Catalog");
             return;
         }
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         String courseId = null;
         boolean validInput = false;
         while(!validInput) {

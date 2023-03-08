@@ -1,5 +1,7 @@
 package org.iitrpr.User;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,34 +9,34 @@ import java.util.Scanner;
 import org.iitrpr.utils.CLI;
 import org.iitrpr.utils.DataStorage;
 
-import javax.swing.plaf.nimbus.State;
-import javax.xml.crypto.Data;
 
 public class Student extends abstractUser {
     Float _CGPA = 0.0f;
+//    Scanner sc;
     public Student(Connection connection, String id, String role) {
         super(connection, id, role);
+//        sc = new Scanner(System.in);
     }
 
     @Override
-    protected void floatCourse(String deptid) {
+    protected void floatCourse(String deptid, Scanner sc) {
 //return null;
     }
 
     @Override
-    protected void editCourseCatalog(String deptid) {
+    protected void editCourseCatalog(String deptid, Scanner sc) {
 //        return null
     }
 
     @Override
-    protected void addNewCourseinCatalog(String deptid) {
+    protected void addNewCourseinCatalog(String deptid, Scanner sc) {
 //        return null
     }
 
     @Override
-    public void showMenu() {
+    public void showMenu(Scanner sc) {
         do {
-            clearScreen();
+//            clearScreen();
 
             ArrayList<String> options = new ArrayList<>();
             options.add("Personal Details");
@@ -48,18 +50,18 @@ public class Student extends abstractUser {
             String body = String.format("Welcome to AIMS Portal (%s)", role.toUpperCase());
             cli.createVSubmenu("Menu",body, options);
             
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             boolean runner;
             do {
                 runner = false;
                 System.out.print("> ");
                 String inp = sc.nextLine();
                 switch (inp) {
-                    case "1" -> showPersonalDetails(DataStorage._STUDENT);
-                    case "2" -> showCourseOffering();
-                    case "3" -> studentRecord(false);
-                    case "4" -> showCurrentEvent();
-                    case "5" -> graduationCheck();
+                    case "1" -> showPersonalDetails(DataStorage._STUDENT, sc);
+                    case "2" -> showCourseOffering(sc);
+                    case "3" -> studentRecord(false, sc);
+                    case "4" -> showCurrentEvent(sc);
+                    case "5" -> graduationCheck(sc);
                     case "6" -> logout();
                     default -> runner = true;
                 }
@@ -67,14 +69,14 @@ public class Student extends abstractUser {
         } while(!isLoggedout);
     }
 
-    void showCourseOffering() {
+    void showCourseOffering(Scanner sc) {
         fetchEvent();
         Integer year = _CURR_SESSION[0] - Integer.parseInt(id.substring(0,4)) + 1;
         String query = String.format("SELECT deptid from student where id = lower('%s')", id);
         ArrayList<ArrayList<String>> data = fetchTable(query);
         String deptId  = data.get(0).get(0);
 //        System.out.println(year);
-        showDeptOffering(deptId, year);
+        showDeptOffering(deptId, year, sc);
     }
 
     private float getCourseCredit(String courseId, Integer year, String deptId, String batch) {
@@ -114,7 +116,7 @@ public class Student extends abstractUser {
         return credit;
     }
 
-    private void showDeptOffering(String deptId, Integer year) {
+    private void showDeptOffering(String deptId, Integer year, Scanner sc) {
         clearScreen();
         fetchEvent();
         String tabName = String.format("y%d_%s_offering", year, deptId);
@@ -177,12 +179,12 @@ public class Student extends abstractUser {
         boolean runner;
         do {
             runner = false;
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             System.out.print("> ");
-            String inp = sc.next();
+            String inp = sc.nextLine();
             switch (inp) {
                 case "1" -> {
-                    enrollCourse(year, deptId);
+                    enrollCourse(year, deptId, sc);
                     runner = true;
                 }
                 case "2" -> {
@@ -195,13 +197,13 @@ public class Student extends abstractUser {
         } while(runner);
     }
 
-    private void enrollCourse(Integer year, String deptId) {
+    private void enrollCourse(Integer year, String deptId, Scanner sc) {
         fetchEvent();
         if(_EVENT != DataStorage._COURSE_REG_START) {
             System.out.println(DataStorage.ANSI_RED + "Sorry currently course Registration is not allowed" + DataStorage.ANSI_RESET);
             return;
         }
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         System.out.print("Enter courseId = ");
         String courseId = sc.nextLine();
         String query = String.format("SELECT * FROM y%d_%s_offering where courseid = lower('%s')", year, deptId, courseId);
@@ -304,7 +306,7 @@ public class Student extends abstractUser {
         else {
             cgCriteria = Float.parseFloat(data.get(0).get(0));
         }
-        studentRecord(true);
+        studentRecord(true, sc);
         if(_CGPA < cgCriteria) {
             System.out.println(DataStorage.ANSI_RED + "CG Criteria is not satisfied" + DataStorage.ANSI_RESET);
             return;
@@ -414,7 +416,7 @@ public class Student extends abstractUser {
                     AND LOWER(table1.grade) <> 'f'""", batch, type);
     }
 
-    private void graduationCheck() {
+    private void graduationCheck(Scanner sc) {
         ArrayList<Float> earnedCredits = new ArrayList<>();
         try {
             String query = generateQuery(id.substring(0, 4),"pc");
@@ -462,9 +464,9 @@ public class Student extends abstractUser {
         options = new ArrayList<>();
         options.add("Back");
         cli.createVSubmenu("Submenu", null, options);
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         System.out.print("> ");
-        String inp = sc.next();
+        String inp = sc.nextLine();
         boolean runner;
         do {
             runner = false;
@@ -479,7 +481,7 @@ public class Student extends abstractUser {
         } while(runner);
     }
 
-    void showCurrentEvent() {
+    void showCurrentEvent(Scanner sc) {
         clearScreen();
         fetchEvent();
         CLI cli = new CLI();
@@ -494,7 +496,7 @@ public class Student extends abstractUser {
         options = new ArrayList<>();
         options.add("Back");
         cli.createVSubmenu("SubMenu", null, options);
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         boolean runner;
         do {
             runner = false;
@@ -507,35 +509,8 @@ public class Student extends abstractUser {
             }
         } while (runner);
     }
-    private ArrayList<ArrayList<String>> fetchOffering(String query) {
-        ArrayList<ArrayList<String>> data = new ArrayList<>();
-        Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            while(rs.next()) {
-                String courseId = rs.getString("courseid").trim();
-                String courseName = rs.getString("coursename").trim();
-                String prereq = rs.getString("prereq");
-                String cgcriteria = rs.getString("cgcriteria");
-                String type = rs.getString("type");
-                String fid = rs.getString("fid");
-                ArrayList<String> temp = new ArrayList<>();
-                temp.add(courseId.toUpperCase());
-                temp.add(courseName);
-                temp.add(prereq != null ? prereq.toUpperCase() : "N/A");
-                temp.add(cgcriteria != null ? cgcriteria : "N/A");
-                temp.add(type);
-                temp.add(getFacultyName(fid).toUpperCase());
-                data.add(temp);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return data;
-    }
 
-    private void studentRecord(boolean flag) {
+    private void studentRecord(boolean flag, Scanner sc) {
         boolean outer;
         do {
             outer = false;
@@ -664,7 +639,7 @@ public class Student extends abstractUser {
             if(!flag)
                 cli.createVSubmenu("SubMenu", null, options);
 
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             boolean inner;
             do {
                 if(flag) break;
@@ -673,7 +648,7 @@ public class Student extends abstractUser {
                 String inp = sc.nextLine();
                 switch (inp) {
                     case "1" -> {
-                        if(courseDrop()) {
+                        if(courseDrop(sc)) {
                             outer = true;
                         }
                         else {
@@ -690,12 +665,12 @@ public class Student extends abstractUser {
         } while(outer);
     }
 
-    private boolean courseDrop() {
+    private boolean courseDrop(Scanner sc) {
         fetchEvent();
         Integer[] session = new Integer[2];
         if(_EVENT == DataStorage._COURSE_REG_START) {
             System.out.print("Enter the CourseID : ");
-            Scanner sc = new Scanner(System.in);
+//            Scanner sc = new Scanner(System.in);
             String input = sc.nextLine().trim();
 
             String query = String.format("SELECT * FROM _%s WHERE courseid = LOWER('%s')", id, input);

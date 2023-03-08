@@ -7,7 +7,7 @@ GRANT ALL ON SCHEMA public TO public;
 CREATE TABLE _USER (
     id varchar,
     role varchar,
-    hashedpass varchar,
+    pass varchar,
     PRIMARY KEY(id)
 );
 
