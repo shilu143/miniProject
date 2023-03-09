@@ -270,6 +270,23 @@ public class Student extends AbstractAll {
             System.out.println("Credit Limit exceeded");
             return;
         }
+
+        String fId = "";
+        if(courseId.equalsIgnoreCase("cp301")) {
+            System.out.print("Enter the Instructor ID = ");
+            fId = sc.nextLine();
+            query = String.format("SELECT * FROM y%d_%s_offering where lower(courseid) = lower('%s') and lower(fid) = lower('%s')",
+                    year,
+                    deptId,
+                    courseId,
+                    fId);
+            if(!dUtil.runQuery(query, true)) {
+                failurePrint("Invalid Instructor ID");
+                return;
+            }
+        }
+
+
 //        System.out.println("OK credit check ok");
         query  = String.format("""
                 SELECT *
@@ -309,7 +326,14 @@ public class Student extends AbstractAll {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        query = String.format("SELECT cgcriteria from y%d_%s_offering where lower(courseid) = lower('%s')", year, deptId, courseId);
+        if(!courseId.equalsIgnoreCase("cp301"))
+            query = String.format("SELECT cgcriteria from y%d_%s_offering where lower(courseid) = lower('%s')", year, deptId, courseId);
+        else
+            query = String.format("SELECT cgcriteria FROM y%d_%s_offering where lower(courseid) = lower('%s') and lower(fid) = lower('%s')",
+                    year,
+                    deptId,
+                    courseId,
+                    fId);
         data = dUtil.fetchTable(query);
         if(data.get(0).get(0).isEmpty()) {
             cgCriteria = 0.0f;
@@ -323,17 +347,30 @@ public class Student extends AbstractAll {
             return;
         }
 //        System.out.println("Done prerequisites");
-        query  = String.format("""
-                SELECT t1.courseid, t1.coursename, t1.ltp, t1.prereq, t3.fid
-                from course_catalog_%s t1
-                inner join (
-                SELECT courseid, MAX(batch) as max_value
-                FROM course_catalog_%s table2
-                WHERE batch <= %s
-                    and lower(courseid) = lower('%s')
-                GROUP BY courseid) t2 on t1.courseid = t2.courseid and t1.batch = t2.max_value
-                inner join y%d_%s_offering t3 on t1.courseid = t3.courseid;
-                """, deptId, deptId, id.substring(0, 4), courseId, year, deptId);
+        if(!courseId.equalsIgnoreCase("cp301"))
+            query  = String.format("""
+                    SELECT t1.courseid, t1.coursename, t1.ltp, t1.prereq, t3.fid
+                    from course_catalog_%s t1
+                    inner join (
+                    SELECT courseid, MAX(batch) as max_value
+                    FROM course_catalog_%s table2
+                    WHERE batch <= %s
+                        and lower(courseid) = lower('%s')
+                    GROUP BY courseid) t2 on t1.courseid = t2.courseid and t1.batch = t2.max_value
+                    inner join y%d_%s_offering t3 on t1.courseid = t3.courseid;
+                    """, deptId, deptId, id.substring(0, 4), courseId, year, deptId);
+        else
+            query  = String.format("""
+                    SELECT t1.courseid, t1.coursename, t1.ltp, t1.prereq, t3.fid
+                    from course_catalog_%s t1
+                    inner join (
+                    SELECT courseid, MAX(batch) as max_value
+                    FROM course_catalog_%s table2
+                    WHERE batch <= %s
+                        and lower(courseid) = lower('%s')
+                    GROUP BY courseid) t2 on t1.courseid = t2.courseid and t1.batch = t2.max_value
+                    inner join y%d_%s_offering t3 on t1.courseid = t3.courseid and t3.fid = lower('%s');
+                    """, deptId, deptId, id.substring(0, 4), courseId, year, deptId, fId);
 //        System.out.println(query);
         try {
             Statement stmt = connection.createStatement();

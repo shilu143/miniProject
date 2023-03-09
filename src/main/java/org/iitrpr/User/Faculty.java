@@ -381,13 +381,24 @@ public class Faculty extends Commons {
         }
 //        System.out.println("Got the course");
         ArrayList<ArrayList<String>> allDept = dUtil.getAllDept();
-        for(var vl : allDept) {
-            for(int yr = 1; yr <= 4; yr++) {
-                query = String.format("SELECT * FROM y%d_%s_offering where courseid = lower('%s')", yr, vl.get(0), courseId);
-                if(dUtil.runQuery(query, true)) {
-                    System.out.println("Sorry this course has already been floated");
-                    return;
+
+//        Capstone Project check
+        if(!courseId.equalsIgnoreCase("cp301")) {
+            for (var vl : allDept) {
+                for (int yr = 1; yr <= 4; yr++) {
+                    query = String.format("SELECT * FROM y%d_%s_offering where lower(courseid) = lower('%s')", yr, vl.get(0), courseId);
+                    if (dUtil.runQuery(query, true)) {
+                        failurePrint("Sorry this course has already been floated");
+                        return;
+                    }
                 }
+            }
+        }
+        else {
+            query = String.format("SELECT * FROM _%s where lower(courseid) = lower('%s')", id, courseId);
+            if(dUtil.runQuery(query, true)) {
+                failurePrint("You hav already Floated this course in the current sem");
+                return;
             }
         }
         float cgCriteria = (float) -1;
@@ -413,10 +424,21 @@ public class Faculty extends Commons {
         yearsAllowed.add(isValidInp("Is 3rd year allowed(y/n) = ", sc));
         yearsAllowed.add(isValidInp("Is 4th year allowed(y/n) = ", sc));
 
+
         ArrayList<Boolean> deptAllowed = new ArrayList<>();
         for (ArrayList<String> strings : allDept) {
-            query  = String.format("SELECT * FROM course_catalog_%s where courseid = lower('%s')", strings.get(0), courseId);
-            deptAllowed.add(dUtil.runQuery(query, true));
+            if(!courseId.equalsIgnoreCase("cp301")) {
+                query  = String.format("SELECT * FROM course_catalog_%s where courseid = lower('%s')", strings.get(0), courseId);
+                deptAllowed.add(dUtil.runQuery(query, true));
+            }
+            else {
+                if(strings.get(0).equalsIgnoreCase(deptId)) {
+                    deptAllowed.add(true);
+                }
+                else {
+                    deptAllowed.add(false);
+                }
+            }
         }
 
         for(int i = 0; i < yearsAllowed.size(); i++) {

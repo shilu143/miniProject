@@ -31,9 +31,11 @@ public class CLI {
         assert options.size() == data.size();
 
         AsciiTable table = new AsciiTable();
-        table.addRule();
-        table.addRow(null, header).setTextAlignment(TextAlignment.CENTER);
-        table.addRule();
+        if(header != null) {
+            table.addRule();
+            table.addRow(null, header).setTextAlignment(TextAlignment.CENTER);
+            table.addRule();
+        }
 
         for(int i = 0;i < options.size();i++) {
             table.addRow(options.get(i).toUpperCase(),data.get(i)).setPaddingLeftRight(2);

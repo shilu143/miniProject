@@ -4,6 +4,7 @@ import org.iitrpr.utils.CLI;
 import org.iitrpr.utils.DataStorage;
 import org.iitrpr.utils.DatabaseQueryUtils;
 
+import javax.swing.text.StyledEditorKit;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,6 +128,7 @@ public abstract class AbstractAll {
         else {
             sId = id;
         }
+        boolean Capstone = false;
         ArrayList<Float> earnedCredits = new ArrayList<>();
         try {
             String query = dUtil.generateQuery(sId.substring(0, 4), "pc");
@@ -135,6 +137,8 @@ public abstract class AbstractAll {
             earnedCredits.add(dUtil.getResultSet(query).getFloat("credits"));
             query = dUtil.generateQuery(sId.substring(0, 4), "e");
             earnedCredits.add(dUtil.getResultSet(query).getFloat("credits"));
+            query = dUtil.generateQuery(sId.substring(0, 4), "cp");
+            Capstone = dUtil.runQuery(query, true);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -165,8 +169,11 @@ public abstract class AbstractAll {
                 break;
             }
         }
+        System.out.print("Capstone Project : ");
+        if(Capstone) System.out.println("Completed\n\n");
+        else System.out.println("Not Done\n\n");
         System.out.print("Graduated : ");
-        if (flag) {
+        if (flag && Capstone) {
             successPrint("YES\n");
         } else {
             failurePrint("NO\n");
@@ -400,7 +407,7 @@ public abstract class AbstractAll {
         fetchEvent();
         String tabName = String.format("y%d_%s_offering", year, deptId);
         String query = String.format("""
-                    SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
+                    SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor, t3.id as fid
                         FROM (
                             SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
                             FROM %s t1
@@ -428,10 +435,11 @@ public abstract class AbstractAll {
         options.add("Type");
         options.add("CG Criteria");
         options.add("Instructor");
+        options.add("Instructor ID");
         CLI cli = new CLI();
         cli.recordPrint("Core Courses", options, data, null, null);
         query = String.format("""
-                    SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor 
+                    SELECT table1.courseid, table1.coursename, table1.ltp, table1.prereq, table1.type, table1.cgcriteria, t3.name as Instructor, t3.id as fid
                         FROM (
                             SELECT t1.courseid, t2.coursename, t2.batch, t2.ltp, t2.type, t1.fid, t1.cgcriteria, t2.prereq
                             FROM %s t1

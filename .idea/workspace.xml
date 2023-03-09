@@ -7,8 +7,6 @@
     <list default="true" id="235fdb59-42ee-49a2-bb43-4aeb73ebbbee" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AbstractAll.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AbstractAll.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AcademicOffice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AcademicOffice.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Commons.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Commons.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java" afterDir="false" />
@@ -127,7 +125,7 @@
       <command value="fetch" />
     </option>
   </component>
-  <component name="RunManager" selected="Gradle.StudentTest4.TestCourseEnrollmentPrereqNotFullFill">
+  <component name="RunManager">
     <configuration name="fileWriterUtil" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.iitrpr.utils.fileWriterUtil" />
       <module name="miniProject.main" />
@@ -279,17 +277,6 @@
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.csv" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java</url>
-          <line>218</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
