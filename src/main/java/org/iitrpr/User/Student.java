@@ -192,7 +192,7 @@ public class Student extends AbstractAll {
                         }
                     }
                     else {
-                        System.out.println("Sorry, you can't drop this course");
+                        failurePrint("Sorry, you can't drop this course");
                     }
                 }
             } catch (SQLException e) {
@@ -211,7 +211,7 @@ public class Student extends AbstractAll {
     private void enrollCourse(Integer year, String deptId, Scanner sc) {
         fetchEvent();
         if(_EVENT != DataStorage._COURSE_REG_START) {
-            System.out.println(DataStorage.ANSI_RED + "Sorry currently course Registration is not allowed" + DataStorage.ANSI_RESET);
+            failurePrint("Sorry currently course Registration is not allowed");
             return;
         }
 //        Scanner sc = new Scanner(System.in);
@@ -220,7 +220,7 @@ public class Student extends AbstractAll {
         String query = String.format("SELECT * FROM y%d_%s_offering where courseid = lower('%s')", year, deptId, courseId);
         ArrayList<ArrayList<String>> data = dUtil.fetchTable(query);
         if(data.size() == 0) {
-            System.out.println(DataStorage.ANSI_RED + "There is no such course exist in the course offering" + DataStorage.ANSI_RESET);
+            failurePrint("There is no such course exist in the course offering");
             return;
         }
         query = String.format("""
@@ -230,7 +230,7 @@ public class Student extends AbstractAll {
                 """, id, courseId);
 //        System.out.println(query);
         if(dUtil.runQuery(query, true)) {
-            System.out.println(DataStorage.ANSI_RED + "You have already done this course previously" + DataStorage.ANSI_RESET);
+            failurePrint("You have already done this course previously");
             return;
         }
         query = String.format("""
@@ -300,7 +300,7 @@ public class Student extends AbstractAll {
                                     and grade is not null and lower(grade) <> 'f'
                                     """, id, crs);
                         if (!dUtil.runQuery(query, true)) {
-                            System.out.println(DataStorage.ANSI_RED + "You do not satisfied the prerequisite for this course" + DataStorage.ANSI_RESET);
+                            failurePrint("You do not satisfied the prerequisite for this course");
                             return;
                         }
                     }
@@ -319,7 +319,7 @@ public class Student extends AbstractAll {
         }
         float _CGPA = studentRecordCumCgpaCalc(true, sc);
         if(_CGPA < cgCriteria) {
-            System.out.println(DataStorage.ANSI_RED + "CG Criteria is not satisfied" + DataStorage.ANSI_RESET);
+            failurePrint("CG Criteria is not satisfied");
             return;
         }
 //        System.out.println("Done prerequisites");
@@ -368,7 +368,7 @@ public class Student extends AbstractAll {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(DataStorage.ANSI_GREEN + "Course Enrolled Successfully" + DataStorage.ANSI_RESET);
+        successPrint("Course Enrolled Successfully");
     }
 
     private Float fetchCreditLimit(String deptId, Integer year) {

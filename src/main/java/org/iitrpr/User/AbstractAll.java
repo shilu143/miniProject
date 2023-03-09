@@ -120,7 +120,7 @@ public abstract class AbstractAll {
                 if (dUtil.runQuery(query, true)) {
                     isValid = true;
                 } else {
-                    System.out.println(DataStorage.ANSI_RED + "There is no student with that id" + DataStorage.ANSI_RESET);
+                    failurePrint("There is no student with that id");
                 }
             }
         }
@@ -165,10 +165,11 @@ public abstract class AbstractAll {
                 break;
             }
         }
+        System.out.print("Graduated : ");
         if (flag) {
-            System.out.println("Graduated : " + DataStorage.ANSI_GREEN + "YES" + DataStorage.ANSI_RESET + "\n");
+            successPrint("YES\n");
         } else {
-            System.out.println("Graduated : " + DataStorage.ANSI_RED + "NO" + DataStorage.ANSI_RESET + "\n");
+            failurePrint("NO\n");
         }
         options = new ArrayList<>();
         options.add("Back");
@@ -242,7 +243,7 @@ public abstract class AbstractAll {
                     if (dUtil.runQuery(query, true)) {
                         isValid = true;
                     } else {
-                        System.out.println(DataStorage.ANSI_RED + "There is no student with that id" + DataStorage.ANSI_RESET);
+                        failurePrint("There is no student with that id");
                     }
                 }
             } else {
@@ -356,7 +357,7 @@ public abstract class AbstractAll {
                         temp.add(courseName);
                         temp.add(ltpc);
                         temp.add(status == DataStorage._COMPLETED ? "Completed" : "Running");
-                        temp.add(grade != null && status == DataStorage._COMPLETED ? grade : "N/A");
+                        temp.add(grade != null && status == DataStorage._COMPLETED ? grade.toUpperCase() : "N/A");
                         data.add(temp);
                     }
                     if (status == DataStorage._COMPLETED) {
@@ -452,6 +453,15 @@ public abstract class AbstractAll {
         cli.recordPrint("Elective Courses", options, data, null, null);
         deptCourseOfferingMenu(year, deptId, sc);
     }
+
+    public void successPrint(String out) {
+        System.out.println(DataStorage.ANSI_GREEN + out + DataStorage.ANSI_RESET);
+    }
+
+    public void failurePrint(String out) {
+        System.out.println(DataStorage.ANSI_RED + out + DataStorage.ANSI_RESET);
+    }
+
 
     abstract boolean studentRecordMenu(String sId, StringBuilder TRANSCRIPT, Scanner sc);
 

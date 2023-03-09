@@ -135,7 +135,7 @@ public class AcademicOffice extends Commons{
             courseId = sc.nextLine();
             String query = String.format("SELECT * FROM COURSE_CATALOG_%s where LOWER(courseid) = LOWER('%s')", deptId, courseId);
             if(dUtil.runQuery(query, true)) {
-                System.out.println(DataStorage.ANSI_RED + "There is already a course with that id" + DataStorage.ANSI_RESET);
+                failurePrint("There is already a course with that id");
             }
             else {
                 validInput = true;
@@ -146,7 +146,7 @@ public class AcademicOffice extends Commons{
         while(!validInput) {
             System.out.print("Enter Course name = ");
             String name = sc.nextLine();
-            System.out.println(name);
+//            System.out.println(name);
             if(name != null) {
                 courseName = name;
                 validInput = true;
@@ -158,23 +158,35 @@ public class AcademicOffice extends Commons{
             String temp = sc.nextLine();
             if(isIntegerArray(temp)) {
                 String[] ttt = temp.split(",");
-                System.out.println(Arrays.toString(ttt));
+//                System.out.println(Arrays.toString(ttt));
                 for(int i = 0; i < ttt.length; i++) ltp[i] = Integer.parseInt(ttt[i].trim());
                 validInput = true;
             }
             else {
-                System.out.println(DataStorage.ANSI_RED + "Enter valid input" + DataStorage.ANSI_RESET);
+                failurePrint("Enter valid input");
             }
         }
 
         validInput = false;
         while(!validInput) {
-            System.out.print("Enter prerequisites (comma separated courseId) = ");
-            String tt = sc.nextLine();
-            if(checkPrereq(tt, deptId)) {
-                prereq = tt.split(",");
-                for(int i = 0; i < prereq.length; i++) prereq[i] = prereq[i].trim();
+            System.out.print("Do you want to add prerequisites (y/n) = ");
+            String input = sc.nextLine().trim();
+            if(input.equalsIgnoreCase("y")) {
+                while(!validInput) {
+                    System.out.print("Enter prerequisites (comma separated courseId) = ");
+                    String tt = sc.nextLine();
+                    if(checkPrereq(tt, deptId)) {
+                        prereq = tt.split(",");
+                        for(int i = 0; i < prereq.length; i++) prereq[i] = prereq[i].trim();
+                        validInput = true;
+                    }
+                }
+            }
+            else if(input.equalsIgnoreCase("n")) {
                 validInput = true;
+            }
+            else {
+                failurePrint("Enter a valid input");
             }
         }
 
@@ -186,10 +198,9 @@ public class AcademicOffice extends Commons{
                 validInput = true;
             }
             else {
-                System.out.println(DataStorage.ANSI_RED + "enter valid input" + DataStorage.ANSI_RESET);
+                failurePrint("enter valid input");
             }
         }
-
 
         String query = String.format("insert into course_catalog_%s values(?,?,?,?,?,?)", deptId);
         try {
@@ -204,8 +215,10 @@ public class AcademicOffice extends Commons{
             pstmt.setInt(6, batch);
             pstmt.execute();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            failurePrint("Error : " + e.getMessage());
+            return;
         }
+        successPrint("Successfully Added the course to the catalog");
     }
 
     public void editCourseCatalog(String deptId, Scanner sc) {
@@ -222,7 +235,7 @@ public class AcademicOffice extends Commons{
             courseId = sc.nextLine();
             String query = String.format("SELECT * FROM COURSE_CATALOG_%s where LOWER(courseid) = LOWER('%s')", deptId, courseId);
             if(!dUtil.runQuery(query, true)) {
-                System.out.println(DataStorage.ANSI_RED + "There is no such course in the catalog with this id" + DataStorage.ANSI_RESET);
+                failurePrint("There is no such course in the catalog with this id");
             }
             else {
                 validInput = true;
@@ -236,7 +249,7 @@ public class AcademicOffice extends Commons{
                 while(!validInput) {
                     System.out.print("Enter Course name = ");
                     String name = sc.nextLine();
-                    System.out.println(name);
+//                    System.out.println(name);
                     if(name != null) {
                         String query = String.format("UPDATE COURSE_CATALOG_%s SET coursename = '%s' where lower(courseid) = lower('%s')", deptId, name, courseId);
                         dUtil.runQuery(query, false);
@@ -248,7 +261,7 @@ public class AcademicOffice extends Commons{
                 validInput = true;
             }
             else {
-                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                failurePrint("Enter a valid input");
             }
         }
 
@@ -278,7 +291,7 @@ public class AcademicOffice extends Commons{
                 validInput = true;
             }
             else {
-                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                failurePrint("Enter a valid input");
             }
         }
 
@@ -310,7 +323,7 @@ public class AcademicOffice extends Commons{
                 validInput = true;
             }
             else {
-                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                failurePrint("Enter a valid input");
             }
         }
 
@@ -331,9 +344,11 @@ public class AcademicOffice extends Commons{
                 validInput = true;
             }
             else {
-                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                failurePrint("Enter a valid input");
             }
         }
+
+        successPrint("Successfully Edited the course");
     }
 
     private void createNewEvent(Scanner sc) {
@@ -388,7 +403,7 @@ public class AcademicOffice extends Commons{
 
                     }
                     else {
-                        System.out.println(DataStorage.ANSI_RED + "Not allowed to create this Event" + DataStorage.ANSI_RESET);
+                        failurePrint("Not allowed to create this Event");
                         runner = true;
                     }
                 }
@@ -421,7 +436,7 @@ public class AcademicOffice extends Commons{
                 case "1" -> {
 //                    generate transcript
                     fileWriterUtil.generateTranscript(sId, TRANSCRIPT.toString());
-                    System.out.println(DataStorage.ANSI_GREEN + "Transcript Generated successfully in the documents folder" + DataStorage.ANSI_RESET);
+                    successPrint("Transcript Generated successfully in the documents folder");
                     runner = true;
                 }
                 case "2" -> {

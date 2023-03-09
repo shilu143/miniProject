@@ -104,6 +104,9 @@ public class CLI {
         table.addRule();
         if(data != null)
             for (ArrayList<String> datum : data) {
+                for (int i = 0; i < datum.size(); i++) {
+                    datum.set(i,datum.get(i).toUpperCase());
+                }
                 table.addRow(datum).setTextAlignment(TextAlignment.CENTER).setPaddingLeftRight(1);
                 table.addRule();
             }

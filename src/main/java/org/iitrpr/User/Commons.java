@@ -56,13 +56,13 @@ public abstract class Commons extends AbstractAll {
             try{
                 year = Integer.parseInt(inp);
                 if(year < 1 || year > 4) {
-                    System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                    failurePrint("Enter a valid input");
                 }
                 else {
                     validInput = true;
                 }
             } catch (NumberFormatException e) {
-                System.out.println(DataStorage.ANSI_RED + "Enter a valid input" + DataStorage.ANSI_RESET);
+                failurePrint("Enter a valid input");
             }
         }
 
@@ -212,7 +212,7 @@ public abstract class Commons extends AbstractAll {
         for (String value : values) {
             try {
                 Integer.parseInt(value.trim());
-                System.out.println(value);
+//                System.out.println(value);
             } catch (NumberFormatException e) {
                 return false;
             }

@@ -6,6 +6,7 @@ import org.iitrpr.utils.CLI;
 import org.iitrpr.utils.DataStorage;
 import org.iitrpr.utils.fileWriterUtil;
 
+import javax.xml.crypto.Data;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
@@ -174,6 +175,7 @@ public class Faculty extends Commons {
 
             options = new ArrayList<>();
             options.add("Drop Course");
+            options.add("Generate CSV for Grade Submission");
             options.add("Upload Grades");
             options.add("Back");
 
@@ -191,12 +193,15 @@ public class Faculty extends Commons {
                         else
                             runner = true;
                     }
-
                     case "2" -> {
-                        uploadGrades(sc);
+                        generateCSVForGradeSubmission(sc);
                         runner = true;
                     }
                     case "3" -> {
+                        uploadGrades(sc);
+                        runner = true;
+                    }
+                    case "4" -> {
 //                    return back
                     }
                     default -> {
@@ -210,14 +215,14 @@ public class Faculty extends Commons {
     protected boolean dropCourse(Scanner sc) {
         fetchEvent();
         if(_EVENT != DataStorage._COURSE_FLOAT_START) {
-            System.out.println(DataStorage.ANSI_RED + "Currently you can't drop course" + DataStorage.ANSI_RESET);
+            failurePrint("Currently you can't drop course");
             return false;
         }
 //        Scanner sc = new Scanner(System.in);
         System.out.print("Enter courseId = ");
         String courseId = sc.nextLine();
         if(!dropCourseUtil(true, courseId)) {
-            System.out.println(DataStorage.ANSI_RED + "you have not floated such course in the current semester" + DataStorage.ANSI_RESET);
+            failurePrint("you have not floated such course in the current semester");
             return false;
         }
         dropCourseUtil(false, courseId);
@@ -260,17 +265,12 @@ public class Faculty extends Commons {
         return true;
     }
 
-    private void uploadGrades(Scanner sc) {
-        fetchEvent();
-        if(_EVENT != DataStorage._GRADE_SUBMISSION_START) {
-            System.out.println(DataStorage.ANSI_RED + "Grade submission is not allowed currently" + DataStorage.ANSI_RESET);
-            return;
-        }
+    private void generateCSVForGradeSubmission(Scanner sc) {
         System.out.print("Enter courseId = ");
 //        Scanner sc = new Scanner(System.in);
         String courseId = sc.nextLine();
         if(!dropCourseUtil(true, courseId)) {
-            System.out.println(DataStorage.ANSI_RED + "No such course is floated by you in the current semester" + DataStorage.ANSI_RESET);
+            failurePrint("No such course is floated by you in the current semester");
             return;
         }
 
@@ -286,25 +286,37 @@ public class Faculty extends Commons {
         ArrayList<ArrayList<String>> data = dUtil.fetchTable(query);
         String filePath = fileWriterUtil.gradeSubmission(courseId, data);
         System.out.println("FILE PATH : " + filePath);
-        System.out.println(DataStorage.ANSI_GREEN + "You can now upload grades on the above file" + DataStorage.ANSI_RESET);
-        boolean validInput = false;
-        while(!validInput) {
-            System.out.print("Enter (Y/y) if you are done uploading grades of each student on that file : ");
-            String inp = sc.nextLine();
-            if(inp.equalsIgnoreCase("y")) {
-                fetchEvent();
-                if(_EVENT != DataStorage._GRADE_SUBMISSION_START) {
-                    System.out.println(DataStorage.ANSI_RED + "Currently you are not allowed to upload grades" + DataStorage.ANSI_RESET);
-                    return;
-                }
-                validInput = true;
-                uploadGradesUtil(filePath, courseId);
-            }
-        }
-        System.out.println(DataStorage.ANSI_GREEN + "Uploaded Grades for the course " + courseId + DataStorage.ANSI_RESET);
+        successPrint("You can now upload grades on the above file");
     }
 
-    private void uploadGradesUtil(String filePath, String courseId) {
+    private void uploadGrades(Scanner sc) {
+        fetchEvent();
+        if(_EVENT != DataStorage._GRADE_SUBMISSION_START) {
+            failurePrint("Grade submission is not allowed currently");
+            return;
+        }
+        System.out.print("Enter courseId = ");
+//        Scanner sc = new Scanner(System.in);
+        String courseId = sc.nextLine();
+        if(!dropCourseUtil(true, courseId)) {
+            failurePrint("No such course is floated by you in the current semester");
+            return;
+        }
+        System.out.print("Enter absolute path for CSV file = ");
+        String filePath = sc.nextLine();
+        fetchEvent();
+        if(_EVENT != DataStorage._GRADE_SUBMISSION_START) {
+            failurePrint("Currently you are not allowed to upload grades");
+            return;
+        }
+        if(!uploadGradesUtil(filePath, courseId)) {
+            failurePrint("Some error occured during uploading grades");
+            return;
+        }
+        successPrint("Uploaded Grades for the course ");
+    }
+
+    private boolean uploadGradesUtil(String filePath, String courseId) {
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             reader.skip(1);
             List<String[]> rows = reader.readAll();
@@ -320,11 +332,10 @@ public class Faculty extends Commons {
 //                System.out.println(query);
                 dUtil.runQuery(query, false);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (CsvException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | CsvException e) {
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -357,7 +368,7 @@ public class Faculty extends Commons {
     public void floatCourse(String deptId, Scanner sc) {
         fetchEvent();
         if(_EVENT != DataStorage._COURSE_FLOAT_START) {
-            System.out.println(DataStorage.ANSI_RED + "Currently not allowed to float course" + DataStorage.ANSI_RESET);
+            failurePrint("Currently not allowed to float course");
             return;
         }
         System.out.print("Enter the course ID = ");
@@ -365,7 +376,7 @@ public class Faculty extends Commons {
         String courseId = sc.nextLine();
         String query = String.format("SELECT * FROM COURSE_CATALOG_%s where courseid = lower('%s')", deptId, courseId);
         if(!dUtil.runQuery(query, true)) {
-            System.out.println(DataStorage.ANSI_RED + "Sorry couldnot find the course with this id" + DataStorage.ANSI_RESET);
+            failurePrint("Sorry couldnot find the course with this id");
             return;
         }
 //        System.out.println("Got the course");
@@ -427,6 +438,6 @@ public class Faculty extends Commons {
         String courseName  = dUtil.fetchTable(query).get(0).get(0);
         query = String.format("INSERT INTO _%s (courseid, coursename, sid, session) values('%s', '%s', 'init', array[%d, %d])",id, courseId, courseName, _CURR_SESSION[0], _CURR_SESSION[1]);
         dUtil.runQuery(query, false);
-        System.out.println(DataStorage.ANSI_GREEN + "Course Floated Successfully" + DataStorage.ANSI_RESET);
+        successPrint("Course Floated Successfully");
     }
 }

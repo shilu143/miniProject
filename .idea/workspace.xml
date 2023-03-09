@@ -12,9 +12,6 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/SeederTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/SeederTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest3.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest3.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest4.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest4.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -286,11 +283,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java</url>
-          <line>318</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java</url>
           <line>218</line>
