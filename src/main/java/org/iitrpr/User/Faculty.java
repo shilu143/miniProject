@@ -80,7 +80,7 @@ public class Faculty extends Commons {
     }
 
     @Override
-    boolean studentRecordMenu(Scanner sc) {
+    boolean studentRecordMenu(String sId, StringBuilder TRANSCRIPT, Scanner sc) {
         CLI cli = new CLI();
         ArrayList<String> options = new ArrayList<>();
         options.add("Back");
@@ -89,7 +89,7 @@ public class Faculty extends Commons {
         do {
             runner = false;
             System.out.print("> ");
-            String input = sc.next();
+            String input = sc.nextLine();
             switch (input) {
                 case "1" -> {
 //                    return back

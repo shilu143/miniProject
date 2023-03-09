@@ -40,7 +40,7 @@ public class Student extends AbstractAll {
                     case "1" -> showPersonalDetails(DataStorage._STUDENT, sc);
                     case "2" -> showCourseOffering(sc);
                     case "3" -> studentRecordCumCgpaCalc(false, sc);
-                    case "4" -> showCurrentEvent(sc);
+                    case "4" -> currentEvent(sc);
                     case "5" -> graduationCheck(sc);
                     case "6" -> logout();
                     default -> runner = true;
@@ -82,7 +82,7 @@ public class Student extends AbstractAll {
     }
 
     @Override
-    boolean studentRecordMenu(Scanner sc) {
+    boolean studentRecordMenu(String sId, StringBuilder TRANSCRIPT, Scanner sc) {
         boolean outer = false;
         CLI cli = new CLI();
         ArrayList<String> options = new ArrayList<>();
@@ -148,7 +148,7 @@ public class Student extends AbstractAll {
         if(_EVENT == DataStorage._COURSE_REG_START) {
             System.out.print("Enter the CourseID : ");
 //            Scanner sc = new Scanner(System.in);
-            String input = sc.nextLine().trim();
+            String input = sc.nextLine();
 
             String query = String.format("SELECT * FROM _%s WHERE courseid = LOWER('%s')", id, input);
             Statement stmt = null;

@@ -1,5 +1,6 @@
 package org.iitrpr.User;
 
+import org.iitrpr.Seeder;
 import org.junit.jupiter.api.*;
 
 import java.io.ByteArrayInputStream;
@@ -16,7 +17,7 @@ public class StudentTest4 {
 
     private Connection connection;
     private InputStream stdin;
-
+    private Seeder seeder;
     // Login to the database before each test
     @BeforeEach
     public void setUp() throws SQLException {
@@ -25,6 +26,9 @@ public class StudentTest4 {
         String password = "root";
         connection = DriverManager.getConnection(url, user, password);
         stdin = System.in;
+        seeder = new Seeder();
+        seeder.generateSchema(connection);
+        seeder.fill(connection);
     }
 
     // Close the database connection after each test
@@ -39,7 +43,7 @@ public class StudentTest4 {
 
         Faculty mockFaculty = new Faculty(connection, "gunturi", "faculty");
         String query = "update event set _event = 1";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
 
         String input = "cs101\nn\ny\ny\ny\ny\n";
         System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
@@ -49,7 +53,7 @@ public class StudentTest4 {
 
 
         query = "update event set _event = 3";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
 
 
         //courseEnroll
@@ -69,7 +73,7 @@ public class StudentTest4 {
         System.setIn(stdin);
 
         query = "update event set _event = 1";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
 
         input = "cs101\n";
         System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
@@ -79,7 +83,7 @@ public class StudentTest4 {
 
 
         query = "update event set _event = 0";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
     }
 
 
@@ -89,7 +93,7 @@ public class StudentTest4 {
 
         Faculty mockFaculty = new Faculty(connection, "gunturi", "faculty");
         String query = "update event set _event = 1";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
 
         String input = "cs101\nn\ny\ny\ny\ny\n";
         System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
@@ -99,7 +103,7 @@ public class StudentTest4 {
 
 
         query = "update event set _event = 3";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
 
 //      enrolled a course
         Student student = new Student(connection, "2020csb1102", "student");
@@ -127,7 +131,7 @@ public class StudentTest4 {
         System.setIn(stdin);
 
         query = "update event set _event = 4";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
 
         //Dropping course after add/drop event closed
         student = new Student(connection, "2020csb1102", "student");
@@ -138,7 +142,7 @@ public class StudentTest4 {
         System.setIn(stdin);
 
         query = "update event set _event = 3";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
 
         //courseDrop
         student = new Student(connection, "2020csb1102", "student");
@@ -150,7 +154,7 @@ public class StudentTest4 {
 
 
         query = "update event set _event = 1";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
 
         input = "cs101\n";
         System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
@@ -160,11 +164,21 @@ public class StudentTest4 {
 
 
         query = "update event set _event = 0";
-        mockFaculty.runQuery(query, false);
+        mockFaculty.dUtil.runQuery(query, false);
     }
 
     @Test
     void TestgraduationCheck() {
+        Student student = new Student(connection, "2020csb1102", "student");
+        String input = "5\n1\n6\n2\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        Scanner sc = new Scanner(System.in);
+        student.showMenu(sc);
+        System.setIn(stdin);
+    }
+
+    @Test
+    void TeststudentRecord() {
         Student student = new Student(connection, "2020csb1102", "student");
         String input = "5\n1\n6\n";
         System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
@@ -173,6 +187,53 @@ public class StudentTest4 {
         System.setIn(stdin);
     }
 
+    @Test
+    void TestEventCheck() {
+        Student student = new Student(connection, "2020csb1102", "student");
+        String input = "4\n1\n6\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        Scanner sc = new Scanner(System.in);
+        student.showMenu(sc);
+        System.setIn(stdin);
+    }
 
 
+    @Test
+    void TestViewStudentRecordAndExit() {
+        Student student = new Student(connection, "2020csb1102", "student");
+        String input = "3\n2\n6\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        Scanner sc = new Scanner(System.in);
+        student.showMenu(sc);
+        System.setIn(stdin);
+    }
+
+    @Test
+    void TestCourseEnrollmentPrereqNotFullFill() {
+
+        Faculty mockFaculty = new Faculty(connection, "gunturi", "faculty");
+        String query = "update event set _event = 1";
+        mockFaculty.dUtil.runQuery(query, false);
+
+        String input = "cs201\nn\ny\ny\ny\ny\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        Scanner sc = new Scanner(System.in);
+        mockFaculty.floatCourse("cse", sc);
+        System.setIn(stdin);
+
+
+        query = "update event set _event = 3";
+        mockFaculty.dUtil.runQuery(query, false);
+
+//      course prereq not fulfilled
+        Student student = new Student(connection, "2020csb1102", "student");
+        input = "2\n1\ncs201\n2\n6\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        sc = new Scanner(System.in);
+        student.showMenu(sc);
+        System.setIn(stdin);
+
+        seeder.generateSchema(connection);
+        seeder.fill(connection);
+    }
 }

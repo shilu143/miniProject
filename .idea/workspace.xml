@@ -6,6 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="235fdb59-42ee-49a2-bb43-4aeb73ebbbee" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AbstractAll.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AbstractAll.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AcademicOffice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AcademicOffice.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Commons.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Commons.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/SeederTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/SeederTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest3.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest3.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest4.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest4.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,23 +95,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.includeInheritedMembers": "true",
-    "jdk.selected.JAVA_MODULE": "18",
-    "last_opened_file_path": "/home/shilu/IdeaProjects/miniProject",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "editor.preferences.fonts.default"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.includeInheritedMembers&quot;: &quot;true&quot;,
+    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;18&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/shilu/IdeaProjects/miniProject&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateTestDialog.Recents.Supers">
       <recent name="" />
@@ -121,7 +130,7 @@
       <command value="fetch" />
     </option>
   </component>
-  <component name="RunManager" selected="Gradle.StudentTest4.TestgraduationCheck">
+  <component name="RunManager" selected="Gradle.StudentTest4.TestCourseEnrollmentPrereqNotFullFill">
     <configuration name="fileWriterUtil" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.iitrpr.utils.fileWriterUtil" />
       <module name="miniProject.main" />
@@ -134,29 +143,6 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
-    </configuration>
-    <configuration name="SeederTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":test" />
-            <option value="--tests" />
-            <option value="&quot;org.iitrpr.SeederTest&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <method v="2" />
     </configuration>
     <configuration name="StudentTest4" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
@@ -181,7 +167,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="StudentTest4.TestCourseEnrollment" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="StudentTest4.TestCourseEnrollmentPrereqNotFullFill" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -194,7 +180,30 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;org.iitrpr.User.StudentTest4.TestCourseEnrollment&quot;" />
+            <option value="&quot;org.iitrpr.User.StudentTest4.TestCourseEnrollmentPrereqNotFullFill&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="StudentTest4.TestEventCheck" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;org.iitrpr.User.StudentTest4.TestEventCheck&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -227,7 +236,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="StudentTest4.TestgraduationCheck" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="StudentTest4.TestViewStudentRecordAndExit" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -240,7 +249,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;org.iitrpr.User.StudentTest4.TestgraduationCheck&quot;" />
+            <option value="&quot;org.iitrpr.User.StudentTest4.TestViewStudentRecordAndExit&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -252,11 +261,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.StudentTest4.TestgraduationCheck" />
+        <item itemvalue="Gradle.StudentTest4.TestCourseEnrollmentPrereqNotFullFill" />
+        <item itemvalue="Gradle.StudentTest4.TestViewStudentRecordAndExit" />
+        <item itemvalue="Gradle.StudentTest4.TestEventCheck" />
         <item itemvalue="Gradle.StudentTest4" />
         <item itemvalue="Gradle.StudentTest4.TestFirstCourseEnrollment" />
-        <item itemvalue="Gradle.StudentTest4.TestCourseEnrollment" />
-        <item itemvalue="Gradle.SeederTest" />
       </list>
     </recent_temporary>
   </component>
@@ -278,9 +287,14 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java</url>
-          <line>160</line>
-          <option name="timeStamp" value="5" />
+          <url>file://$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java</url>
+          <line>318</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java</url>
+          <line>218</line>
+          <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

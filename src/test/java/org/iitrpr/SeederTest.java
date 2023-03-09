@@ -28,7 +28,7 @@ class SeederTest {
         }
     }
     @Test
-    void generateSchemaTest() {
+    void seederTest() {
         Seeder ss = new Seeder();
         assertTrue(ss.generateSchema(connection));
         assertTrue(ss.fill(connection));

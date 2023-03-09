@@ -2,6 +2,7 @@ package org.iitrpr.User;
 
 import org.iitrpr.utils.CLI;
 import org.iitrpr.utils.DataStorage;
+import org.iitrpr.utils.fileWriterUtil;
 
 import java.sql.Array;
 import java.sql.Connection;
@@ -131,7 +132,7 @@ public class AcademicOffice extends Commons{
         boolean validInput = false;
         while(!validInput) {
             System.out.print("Enter the course ID = ");
-            courseId = sc.next();
+            courseId = sc.nextLine();
             String query = String.format("SELECT * FROM COURSE_CATALOG_%s where LOWER(courseid) = LOWER('%s')", deptId, courseId);
             if(dUtil.runQuery(query, true)) {
                 System.out.println(DataStorage.ANSI_RED + "There is already a course with that id" + DataStorage.ANSI_RESET);
@@ -144,7 +145,6 @@ public class AcademicOffice extends Commons{
         validInput = false;
         while(!validInput) {
             System.out.print("Enter Course name = ");
-            sc.nextLine();
             String name = sc.nextLine();
             System.out.println(name);
             if(name != null) {
@@ -181,7 +181,7 @@ public class AcademicOffice extends Commons{
         validInput = false;
         while(!validInput) {
             System.out.print("Enter the course type(pc or ec or e) = ");
-            type = sc.next().trim();
+            type = sc.nextLine().trim();
             if(type.equalsIgnoreCase("pc") || type.equalsIgnoreCase("ec") || type.equalsIgnoreCase("e")) {
                 validInput = true;
             }
@@ -219,7 +219,7 @@ public class AcademicOffice extends Commons{
         boolean validInput = false;
         while(!validInput) {
             System.out.print("Enter the course ID = ");
-            courseId = sc.next();
+            courseId = sc.nextLine();
             String query = String.format("SELECT * FROM COURSE_CATALOG_%s where LOWER(courseid) = LOWER('%s')", deptId, courseId);
             if(!dUtil.runQuery(query, true)) {
                 System.out.println(DataStorage.ANSI_RED + "There is no such course in the catalog with this id" + DataStorage.ANSI_RESET);
@@ -231,11 +231,10 @@ public class AcademicOffice extends Commons{
         validInput = false;
         while(!validInput) {
             System.out.print("Do you want to edit the course Name (y/n) = ");
-            String input = sc.next().trim();
+            String input = sc.nextLine().trim();
             if(input.equalsIgnoreCase("y")) {
                 while(!validInput) {
                     System.out.print("Enter Course name = ");
-                    sc.nextLine();
                     String name = sc.nextLine();
                     System.out.println(name);
                     if(name != null) {
@@ -256,11 +255,10 @@ public class AcademicOffice extends Commons{
         validInput = false;
         while(!validInput) {
             System.out.print("Do you want to edit the ltp structure (y/n) = ");
-            String input = sc.next().trim();
+            String input = sc.nextLine().trim();
             if(input.equalsIgnoreCase("y")) {
                 while(!validInput) {
                     System.out.print("Enter ltp (l,t,p) = ");
-                    sc.nextLine();
                     input = sc.nextLine();
                     System.out.println(input);
                     if(isIntegerArray(input)) {
@@ -287,11 +285,10 @@ public class AcademicOffice extends Commons{
         validInput = false;
         while(!validInput) {
             System.out.print("Do you want to edit the prerequisites (y/n) = ");
-            String input = sc.next().trim();
+            String input = sc.nextLine().trim();
             if(input.equalsIgnoreCase("y")) {
                 while(!validInput) {
                     System.out.print("Enter prerequisites (comma separated courseId) = ");
-                    sc.nextLine();
                     input = sc.nextLine();
                     if(checkPrereq(input, deptId)) {
                         String[] val = input.split(",");
@@ -320,11 +317,10 @@ public class AcademicOffice extends Commons{
         validInput = false;
         while(!validInput) {
             System.out.print("Do you want to change the course type (y/n) = ");
-            String input = sc.next().trim();
+            String input = sc.nextLine().trim();
             if(input.equalsIgnoreCase("y")) {
                 while(!validInput) {
                     System.out.print("Enter new Course Type (pc or ec or e) = ");
-                    sc.nextLine();
                     input = sc.nextLine();
                     if(changeCourseType(input, deptId, courseId)) {
                         validInput = true;
@@ -359,7 +355,7 @@ public class AcademicOffice extends Commons{
         do {
             runner = false;
             System.out.print("> ");
-            String inp = sc.nextLine().trim();
+            String inp = sc.nextLine();
             try {
                 int vl = Integer.parseInt(inp);
                 if(vl >= 1 &&  vl <= 8) {
@@ -410,18 +406,25 @@ public class AcademicOffice extends Commons{
     }
 
     @Override
-    boolean studentRecordMenu(Scanner sc) {
+    boolean studentRecordMenu(String sId, StringBuilder TRANSCRIPT, Scanner sc) {
         CLI cli = new CLI();
         ArrayList<String> options = new ArrayList<>();
+        options.add("Generate Transcript");
         options.add("Back");
         cli.createVSubmenu("SubMenu", null, options);
         boolean runner;
         do {
             runner = false;
             System.out.print("> ");
-            String input = sc.next();
+            String input = sc.nextLine();
             switch (input) {
                 case "1" -> {
+//                    generate transcript
+                    fileWriterUtil.generateTranscript(sId, TRANSCRIPT.toString());
+                    System.out.println(DataStorage.ANSI_GREEN + "Transcript Generated successfully in the documents folder" + DataStorage.ANSI_RESET);
+                    runner = true;
+                }
+                case "2" -> {
 //                    return back
                 }
                 default -> {

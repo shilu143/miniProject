@@ -115,7 +115,7 @@ public abstract class AbstractAll {
             boolean isValid = false;
             while (!isValid) {
                 System.out.print("Enter the Student ID = ");
-                sId = sc.next();
+                sId = sc.nextLine();
                 String query = String.format("select * from student where lower(id) = lower('%s')", sId);
                 if (dUtil.runQuery(query, true)) {
                     isValid = true;
@@ -174,7 +174,7 @@ public abstract class AbstractAll {
         options.add("Back");
         cli.createVSubmenu("Submenu", null, options);
         System.out.print("> ");
-        String inp = sc.next().trim();
+        String inp = sc.nextLine();
         boolean runner;
         do {
             runner = false;
@@ -207,35 +207,6 @@ public abstract class AbstractAll {
         }
     }
 
-    void showCurrentEvent(Scanner sc) {
-        clearScreen();
-        fetchEvent();
-        CLI cli = new CLI();
-        ArrayList<String> options = new ArrayList<>();
-        ArrayList<String> data = new ArrayList<>();
-        options.add("Academic Session");
-        options.add("Current Event");
-        data.add(String.format("%d - %d", _CURR_SESSION[0], _CURR_SESSION[1]));
-        data.add(String.format("%s", dataStorage.EventHash.get(_EVENT)));
-        cli.createVerticalTable("EVENT", options, data);
-
-        options = new ArrayList<>();
-        options.add("Back");
-        cli.createVSubmenu("SubMenu", null, options);
-//        Scanner sc = new Scanner(System.in);
-        boolean runner;
-        do {
-            runner = false;
-            System.out.print("> ");
-            String inp = sc.nextLine();
-            if (inp.equals("1")) {
-//                    return back
-            } else {
-                runner = true;
-            }
-        } while (runner);
-    }
-
     void currentEvent(Scanner sc) {
         boolean outer;
         do {
@@ -266,7 +237,7 @@ public abstract class AbstractAll {
                 boolean isValid = false;
                 while (!isValid) {
                     System.out.print("Enter the Student ID = ");
-                    sId = sc.next();
+                    sId = sc.nextLine();
                     String query = String.format("select * from student where lower(id) = lower('%s')", sId);
                     if (dUtil.runQuery(query, true)) {
                         isValid = true;
@@ -277,6 +248,26 @@ public abstract class AbstractAll {
             } else {
                 sId = id;
             }
+
+            ResultSet studentData = dUtil.getResultSet(String.format("select * from student  inner join department on department.deptid = student.deptid where lower(student.id) = lower('%s')", sId));
+            StringBuilder TRANSCRIPT = new StringBuilder();
+
+            try {
+                TRANSCRIPT.append("\nName : ");
+                TRANSCRIPT.append(studentData.getString("name").toUpperCase());
+                TRANSCRIPT.append("\nID : ");
+                TRANSCRIPT.append(studentData.getString("id").toUpperCase());
+                TRANSCRIPT.append("\nDepartment : ");
+                TRANSCRIPT.append(studentData.getString("deptname"));
+                TRANSCRIPT.append("\nEmail : ");
+                TRANSCRIPT.append(studentData.getString("email"));
+                TRANSCRIPT.append("\nContact : ");
+                TRANSCRIPT.append(studentData.getString("contact"));
+                TRANSCRIPT.append("\n\n");
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
 
             float CGPA = 0;
             outer = false;
@@ -290,7 +281,6 @@ public abstract class AbstractAll {
             try {
                 //Event fetching
                 fetchEvent();
-
                 Statement stmt = connection.createStatement();
                 ResultSet rs = stmt.executeQuery(query);
                 while (rs.next()) {
@@ -376,8 +366,9 @@ public abstract class AbstractAll {
                     }
                     if (cumulativeEarnedCreated == 0) CGPA = 0;
                     else CGPA = (cumulativeTotalGP / cumulativeEarnedCreated);
-                    if (Calc)
+                    if (Calc) {
                         return CGPA;
+                    }
 
                     ArrayList<String> footerOptions = new ArrayList<>();
                     ArrayList<String> footerData = new ArrayList<>();
@@ -389,14 +380,16 @@ public abstract class AbstractAll {
                     footerData.add(String.valueOf((status == DataStorage._COMPLETED) ? SGPA : "N/A"));
                     footerOptions.add("CGPA");
                     footerData.add(String.valueOf(CGPA));
-                    cli.recordPrint(header, options, data, footerOptions, footerData);
+                    TRANSCRIPT.append(cli.recordPrint(header, options, data, footerOptions, footerData));
                 }
                 stmt.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-
-            outer = studentRecordMenu(sc);
+            if(Calc) {
+                return CGPA;
+            }
+            outer = studentRecordMenu(sId, TRANSCRIPT, sc);
         } while (outer);
         return 0.0f;
     }
@@ -460,7 +453,7 @@ public abstract class AbstractAll {
         deptCourseOfferingMenu(year, deptId, sc);
     }
 
-    abstract boolean studentRecordMenu(Scanner sc);
+    abstract boolean studentRecordMenu(String sId, StringBuilder TRANSCRIPT, Scanner sc);
 
     abstract void deptCourseOfferingMenu(int year, String deptId, Scanner sc);
 }
