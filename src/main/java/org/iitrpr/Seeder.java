@@ -208,9 +208,9 @@ public class Seeder {
 
         String USER = dotenv.get("DB_USER");
         String PASS = dotenv.get("DB_PASS");
-
+        String dbName = dotenv.get("DB_NAME");
         Connection connection = null;
-        String url = "jdbc:postgresql://localhost:5432/aimsdb";
+        String url = String.format("jdbc:postgresql://localhost:5432/%s", dbName);
         try {
             connection = DriverManager.getConnection(url, USER, PASS);
             if(connection != null) {

@@ -19,13 +19,15 @@ class SeederTest {
         // set up database connection
         String USER = "postgres";
         String PASS = "root";
-        String dbName = "aimsdb";
+        String dbName = "aimsdbtest";
         String url = String.format("jdbc:postgresql://localhost:5432/%s", dbName);
         try {
             connection = DriverManager.getConnection(url, USER, PASS);
+            connection.setAutoCommit(false);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
     }
     @Test
     void seederTest() {
@@ -39,6 +41,8 @@ class SeederTest {
         // close database connection
         try {
             if (connection != null) {
+                connection.rollback();
+                connection.setAutoCommit(true);
                 connection.close();
             }
         } catch (SQLException e) {

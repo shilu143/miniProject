@@ -5,11 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="235fdb59-42ee-49a2-bb43-4aeb73ebbbee" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/AcademicOfficeTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/FacultyTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AbstractAll.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/AbstractAll.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Faculty.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Student.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/utils/CLI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/Seeder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/Seeder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Commons.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/iitrpr/User/Commons.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/SeederTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/SeederTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest3.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest4.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/iitrpr/User/StudentTest4.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,8 +60,8 @@
         <option value="Interface" />
         <option value="Record" />
         <option value="Enum" />
-        <option value="JUnit5 Test Class" />
         <option value="Class" />
+        <option value="JUnit5 Test Class" />
       </list>
     </option>
   </component>
@@ -116,8 +119,8 @@
       <recent name="org.iitrpr.utils" />
     </key>
     <key name="CreateTestDialog.RecentsKey">
-      <recent name="org.iitrpr" />
       <recent name="org.iitrpr.User" />
+      <recent name="org.iitrpr" />
     </key>
   </component>
   <component name="RunAnythingCache">
@@ -125,7 +128,7 @@
       <command value="fetch" />
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Gradle.AcademicOfficeTest.TestGraduationCheck">
     <configuration name="fileWriterUtil" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.iitrpr.utils.fileWriterUtil" />
       <module name="miniProject.main" />
@@ -139,7 +142,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="StudentTest4" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="AcademicOfficeTest.AcademicOfficeOffering" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -152,7 +155,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;org.iitrpr.User.StudentTest4&quot;" />
+            <option value="&quot;org.iitrpr.User.AcademicOfficeTest.AcademicOfficeOffering&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -162,7 +165,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="StudentTest4.TestCourseEnrollmentPrereqNotFullFill" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="AcademicOfficeTest.TestAcademicOfficeCourseCatalog" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -175,7 +178,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;org.iitrpr.User.StudentTest4.TestCourseEnrollmentPrereqNotFullFill&quot;" />
+            <option value="&quot;org.iitrpr.User.AcademicOfficeTest.TestAcademicOfficeCourseCatalog&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -185,7 +188,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="StudentTest4.TestEventCheck" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="AcademicOfficeTest.TestAcademicOfficePersonalDetails" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -198,7 +201,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;org.iitrpr.User.StudentTest4.TestEventCheck&quot;" />
+            <option value="&quot;org.iitrpr.User.AcademicOfficeTest.TestAcademicOfficePersonalDetails&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -208,7 +211,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="StudentTest4.TestFirstCourseEnrollment" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="AcademicOfficeTest.TestAcademicOfficeViewAndEditEvent" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -221,7 +224,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;org.iitrpr.User.StudentTest4.TestFirstCourseEnrollment&quot;" />
+            <option value="&quot;org.iitrpr.User.AcademicOfficeTest.TestAcademicOfficeViewAndEditEvent&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -231,7 +234,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="StudentTest4.TestViewStudentRecordAndExit" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="AcademicOfficeTest.TestGraduationCheck" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -244,7 +247,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;org.iitrpr.User.StudentTest4.TestViewStudentRecordAndExit&quot;" />
+            <option value="&quot;org.iitrpr.User.AcademicOfficeTest.TestGraduationCheck&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -256,11 +259,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.StudentTest4.TestCourseEnrollmentPrereqNotFullFill" />
-        <item itemvalue="Gradle.StudentTest4.TestViewStudentRecordAndExit" />
-        <item itemvalue="Gradle.StudentTest4.TestEventCheck" />
-        <item itemvalue="Gradle.StudentTest4" />
-        <item itemvalue="Gradle.StudentTest4.TestFirstCourseEnrollment" />
+        <item itemvalue="Gradle.AcademicOfficeTest.TestGraduationCheck" />
+        <item itemvalue="Gradle.AcademicOfficeTest.TestAcademicOfficeViewAndEditEvent" />
+        <item itemvalue="Gradle.AcademicOfficeTest.AcademicOfficeOffering" />
+        <item itemvalue="Gradle.AcademicOfficeTest.TestAcademicOfficeCourseCatalog" />
+        <item itemvalue="Gradle.AcademicOfficeTest.TestAcademicOfficePersonalDetails" />
       </list>
     </recent_temporary>
   </component>
